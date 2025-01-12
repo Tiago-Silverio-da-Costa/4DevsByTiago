@@ -3,7 +3,7 @@
         <div class="mx-auto w-5/6 max-w-4xl py-4">
             <Search />
             <div class="flex flex-wrap gap-5 justify-center">
-                <div v-for="post in posts" :key="post.id" class="mt-4 w-96 border-2 border-[#FF8200] rounded-md">
+                <NuxtLink :to="`/${post.id}`" v-for="post in posts" :key="post.id" class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                     <!-- image -->
                     <div class="flex-1 bg-[#181C14] border-b-2 border-b-[#FF8200]">
                         <NuxtImg :src="post.post_image_url" alt="image" width="400" height="200" />
@@ -21,7 +21,7 @@
                         </div>
                         <span>{{ post.category }}</span>
                      </div>
-                </div>
+                </NuxtLink>
             </div>
         </div>
     </div>
