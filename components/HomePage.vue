@@ -3,7 +3,8 @@
         <div class="mx-auto w-5/6 max-w-4xl py-4">
             <Search />
             <div class="flex flex-wrap gap-5 justify-center">
-                <NuxtLink :to="`/${post.id}`" v-for="post in posts" :key="post.id" class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
+                <NuxtLink :to="`/${post.id}`" v-for="post in posts" :key="post.id"
+                    class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                     <!-- image -->
                     <div class="flex-1 bg-[#181C14] border-b-2 border-b-[#FF8200]">
                         <NuxtImg :src="post.post_image_url" alt="image" width="400" height="200" />
@@ -14,13 +15,14 @@
                         <p class=" text-md flex max-w-md ">{{ post.description }}</p>
                     </div>
                     <!-- footer -->
-                    <div class="flex px-8 py-4 items-center justify-between border-t-2 border-t-[#FF8200] text-[#FF8200]">
-                        <div class="flex items-center gap-2"> 
+                    <div
+                        class="flex px-8 py-4 items-center justify-between border-t-2 border-t-[#FF8200] text-[#FF8200]">
+                        <div class="flex items-center gap-2">
                             <NuxtImg src="watchIcon.svg" alt="image" width="20" height="20" />
                             <span>{{ post.publication_date }}</span>
                         </div>
                         <span>{{ post.category }}</span>
-                     </div>
+                    </div>
                 </NuxtLink>
             </div>
         </div>
@@ -30,45 +32,25 @@
 
 <script>
 import Search from '@/components/Search.vue';
+import axios from 'axios';
 
 export default {
-    components: {
-        Search,
-    },
     data() {
         return {
-            posts: [
-                {
-                    id: 1,
-                    title: 'Dicas para Desenvolvedores',
-                    description: 'Descubra como novas ferramentas e frameworks estão revolucionando o desenvolvimento web e ajudando a criar soluções mais eficientes.',
-                    content: '',
-                    post_image_url: 'https://i.imgur.com/4WsRhkB.jpeg',
-                    publication_date: '2025-01-12',
-                    category: 'Tecnologia'
-                },
-                {
-                    id: 2,
-                    title: 'Dicas para Desenvolvedores',
-                    description: 'Descubra como novas ferramentas e frameworks estão revolucionando o desenvolvimento web e ajudando a criar soluções mais eficientes.',
-                    content: '',
-                    post_image_url: 'https://i.imgur.com/4WsRhkB.jpeg',
-                    publication_date: '2025-01-10',
-                    category: 'Desenvolvimento'
-                },
-                {
-                    id: 3,
-                    title: 'Tendências de Design 2025',
-                    description: 'Saiba o que está em alta no design este ano e como aplicar essas tendências para criar interfaces modernas e intuitivas.',
-                    content: '',
-                    post_image_url: 'https://i.imgur.com/4WsRhkB.jpeg',
-                    publication_date: '2025-01-08',
-                    category: 'Design'
-                },
-            ],
+            posts: [],
         };
     },
-};
+    mounted() {
+        axios.get("http://127.0.0.1:8080/api/posts")
+        .then(response => {
+            console.log("Posts fetched:", response.data);
+            this.posts = response.data;
+        })
+        .catch(error => {
+            console.error("Error fetching posts", error)
+        })
+    }
+}
 </script>
 
 <style scoped>
