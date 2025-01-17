@@ -1,8 +1,8 @@
 <template>
     <div class="bg-[#3C3D37] text-white">
-        <div class="mx-auto w-5/6 max-w-4xl py-4">
+        <div class="mx-auto w-5/6 max-w-[49.5rem] py-4">
             <Search />
-            <div class="flex flex-wrap gap-5 justify-center">
+            <div class="flex flex-wrap gap-5 justify-center w-full">
                 <NuxtLink :to="`/${post.id}`" v-for="post in posts" :key="post.id"
                     class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                     <!-- image -->
