@@ -25,10 +25,10 @@ export default {
     created() {
         const id = Number(this.$route.params.id);
 
-        axios.get(`http://127.0.0.1:8080/api/posts/${id}`)
+        axios.get(`http://127.0.0.1:8080/post/post/${id}`)
             .then(response => {
                 console.log("Posts fetched:", response.data)
-                this.post = response.data;
+                this.post = response.data.data;
 
                 const publicationDate = new Date(response.data.publication_date)
                 this.formattedPublicationDate = publicationDate.toLocaleDateString("Pt-BR", {

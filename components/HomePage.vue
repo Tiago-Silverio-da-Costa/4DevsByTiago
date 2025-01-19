@@ -33,6 +33,7 @@
 <script>
 import Search from '@/components/Search.vue';
 import axios from 'axios';
+import { onMounted } from 'vue';
 
 export default {
     data() {
@@ -41,14 +42,16 @@ export default {
         };
     },
     mounted() {
-        axios.get("http://127.0.0.1:8080/api/posts")
-        .then(response => {
-            console.log("Posts fetched:", response.data);
-            this.posts = response.data;
-        })
-        .catch(error => {
-            console.error("Error fetching posts", error)
-        })
+
+        axios.get("http://127.0.0.1:8080/post/post")
+            .then(response => {
+                console.log("Posts fetched:", response.data);
+                this.posts = response.data.data;
+            })
+            .catch(error => {
+                console.error("Error fetching posts", error)
+            })
+
     }
 }
 </script>
