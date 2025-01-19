@@ -1,9 +1,18 @@
 <template>
     <div class="bg-[#3C3D37] text-white">
         <div class="mx-auto w-5/6 max-w-[49.5rem] py-4">
-            <Search />
-            <div class="flex flex-wrap gap-5 justify-center w-full">
-                <NuxtLink :to="`/${post.id}`" v-for="post in posts" :key="post.id"
+            <Search @search="updateSearchQuery" :intialQuery="searchQuery" />
+
+            <div class="flex flex-wrap gap-5 justify-center w-full"
+                :class="{ 'min-h-[100vh]': searchQuery.length > 0 }">
+
+                <div v-if="searchQuery && filteredPosts.length === 0"
+                    class="flex justify-center self-center items-center text-center text-xl font-bold bg-[#FF8200] text-white px-8 py-4 h-fit rounded-md mt-8">
+                    Nenhum resultado encontrado.
+                </div>
+
+
+                <NuxtLink :to="`/${post.id}`" v-for="post in filteredPosts" :key="post.id"
                     class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                     <!-- image -->
                     <div class="flex-1 bg-[#181C14] border-b-2 border-b-[#FF8200]">
@@ -33,19 +42,35 @@
 <script>
 import Search from '@/components/Search.vue';
 import axios from 'axios';
-import { onMounted } from 'vue';
 
 export default {
+    components: {
+        Search,
+    },
     data() {
         return {
             posts: [],
+            searchQuery: ""
         };
+    },
+    computed: {
+        filteredPosts() {
+            return this.posts.filter((post) =>
+                post.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                post.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        },
+    },
+    methods: {
+        updateSearchQuery(query) {
+            this.searchQuery = query
+        }
     },
     mounted() {
 
         axios.get("http://127.0.0.1:8080/post/post")
             .then(response => {
-                console.log("Posts fetched:", response.data);
+                console.log("Posts fetched:", response.data.data);
                 this.posts = response.data.data;
             })
             .catch(error => {
