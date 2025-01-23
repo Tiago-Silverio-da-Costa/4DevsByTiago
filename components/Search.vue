@@ -1,6 +1,6 @@
 <template>
     <div>
-        <form class="flex items-center" @submit.prevent>
+        <form class="flex items-center text-black" @submit.prevent>
             <input placeholder="Pesquisar" class="border px-3 py-[0.58rem] rounded-tl-md rounded-bl-md w-full"
                 v-model="localQuery"  @input="emitSearch" />
 

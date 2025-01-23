@@ -1,7 +1,10 @@
 <template>
     <div v-if="post" class="bg-[#3C3D37] text-white">
-        <div class="mx-auto w-5/6 max-w-4xl py-4">
+        <div class="overflow-hidden h-80 flex items-center mb-20">
             <NuxtImg v-if="post.post_image_url" :src="post.post_image_url" alt="image" width="100%" height="200" />
+        </div>
+
+        <div class="mx-auto w-5/6 max-w-3xl py-4">
             <!-- <span class="font-bold text-xl mt-2">Autor: {{ post.author_name }}</span> -->
             <h1 class="font-bold text-4xl mt-4">{{ post.title }}</h1>
             <div class="mt-4" v-html="introductionContent"></div>
@@ -12,7 +15,7 @@
             </ul>
             <div class="mt-4" v-html="processedContent"></div>
             <div class="mt-4 text-[#FF8200]">
-                <span>{{ formattedPublicationDate }}</span> | <span>{{ post.category_name }}</span>
+                <span>{{ post.publication_date }}</span> | <span>{{ post.category_name }}</span>
             </div>
         </div>
     </div>
@@ -77,7 +80,7 @@ export default {
 
                 if (isTitle) {
                     isFirstTitleFound = true;
-                    const title = line.replace(/<title>/, '').trim();
+                    const title = line.replace(/<\/?title>/g, '').trim();
                     const formattedTitle = title.replace(/\s+/g, '-');
                     titles.push({ title, formattedTitle });
 
@@ -94,6 +97,12 @@ export default {
 
                     introductionContent.push(`<p>${line}</p><br />`)
                     return
+                }
+
+                if (isImage) {
+                    const imgSrc = line.replace(/<image>|<\/image>/g, '').trim();
+                    newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
+                    return;
                 }
 
                 if (isCodeStart) {
