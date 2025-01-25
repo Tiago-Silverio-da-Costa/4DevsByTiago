@@ -17,6 +17,8 @@
             <div class="mt-4 text-[#FF8200]">
                 <span>{{ post.publication_date }}</span> | <span>{{ post.category_name }}</span>
             </div>
+
+            <Comments :postId="post.id" />
         </div>
     </div>
 </template>
@@ -24,8 +26,12 @@
 
 <script>
 import axios from 'axios'
+import Comments from "@/components/comments/Comments.vue";
 
 export default {
+    components: {
+        Comments,
+    },
     data() {
         return {
             post: null,
