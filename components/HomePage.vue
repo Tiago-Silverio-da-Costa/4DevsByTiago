@@ -11,7 +11,7 @@
                     </div>
 
 
-                    <NuxtLink :to="`/${post.id}`" v-for="post in filteredPosts" :key="post.id"
+                    <NuxtLink :to="`/${post.id}`" v-for="post in paginationPosts" :key="post.id"
                         class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                         <!-- image -->
                         <div class="flex-1 bg-[#181C14] border-b-2 border-b-[#FF8200]">
@@ -34,6 +34,22 @@
                     </NuxtLink>
                 </div>
             </div>
+
+            <div v-if="filteredPosts.length > postsPerPage" class="flex justify-center items-center gap-4 mt-8">
+                <button @click="prevPage" :disabled="current === 1"
+                    class="px-4 py-2 bg-[#FF8200] text-white rounded-md font-bold">
+                    <NuxtImg src="/left-arrow.svg" alt="image" width="20" height="40" />
+
+                </button>
+
+                <span>Página {{ currentPage }} de {{ totalPages }}</span>
+
+                <button @click="nextPage" :disabled="currentPage === totalPages"
+                    class="px-4 py-2 bg-[#FF8200] text-white rounded-md font-bold">
+                    <NuxtImg src="/right-arrow.svg" alt="image" width="20" height="40" />
+
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -50,7 +66,9 @@ export default {
     data() {
         return {
             posts: [],
-            searchQuery: ""
+            searchQuery: "",
+            currentPage: 1,
+            postsPerPage: 5,
         };
     },
     computed: {
@@ -60,14 +78,31 @@ export default {
                 post.description.toLowerCase().includes(this.searchQuery.toLowerCase())
             );
         },
+        paginationPosts() {
+            const start = (this.currentPage - 1) * this.postsPerPage;
+            const end = start + this.postsPerPage;
+            return this.filteredPosts.slice(start, end)
+        },
+        totalPages() {
+            return Math.ceil(this.filteredPosts.length / this.postsPerPage);
+        }
     },
     methods: {
         updateSearchQuery(query) {
             this.searchQuery = query
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
         }
     },
     mounted() {
-
         axios.get("http://127.0.0.1:8080/post/post")
             .then(response => {
                 console.log("Posts fetched:", response.data.data);
@@ -76,7 +111,6 @@ export default {
             .catch(error => {
                 console.error("Error fetching posts", error)
             })
-
     }
 }
 </script>
