@@ -64,7 +64,7 @@ export default {
             if (!this.newComment.trim()) return
 
             const token = localStorage.getItem("token");
-            const userId = localStorage.getItem("userId");
+            const user_id = localStorage.getItem("userId");
 
 
             this.addingComment = true
@@ -72,9 +72,11 @@ export default {
             try {
                 await axios.post(`http://127.0.0.1:8080/comments/comments`,
                     {
-                        post_id: this.postId,
-                        content: this.newComment,
-                        userId: userId
+                        comment: {
+                            post_id: this.postId,
+                            content: this.newComment,
+                            user_id: Number(user_id), 
+                        },
                     },
                     {
                         headers: {
