@@ -46,6 +46,10 @@ export default {
             try {
                 const response = await axios.post("http://127.0.0.1:8080/user/login", dataSend);
                 console.log("Login successful:", response.data);
+                localStorage.setItem("token", response.data.results.token);
+                localStorage.setItem("userId", response.data.results.userId);
+
+                // this.$router.push("/");
             } catch (error) {
                 console.error("Error logging in:", error);
                 this.errorMessage = error.response?.data?.message || "An error occured while logging in."

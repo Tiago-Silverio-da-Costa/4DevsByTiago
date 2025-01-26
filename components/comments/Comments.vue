@@ -56,14 +56,25 @@ export default {
         },
         async addComment() {
             if (!this.newComment.trim()) return
-    
+
+            const token = localStorage.getItem("token");
+            const userId = localStorage.getItem("userId");
+
+
             this.addingComment = true
-    
+
             try {
-                await axios.post(`http://127.0.0.1:8080/comments/comments`, {
-                    post_id: this.postId,
-                    content: this.newComment,
-                })
+                await axios.post(`http://127.0.0.1:8080/comments/comments`,
+                    {
+                        post_id: this.postId,
+                        content: this.newComment,
+                        userId: userId
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
                 this.newComment = ""
                 this.fetchComments()
             } catch (error) {
