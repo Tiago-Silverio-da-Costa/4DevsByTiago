@@ -12,7 +12,7 @@
 
 
                     <NuxtLink :to="`/${post.id}`" v-for="post in paginationPosts" :key="post.id"
-                        class="bg-[#181C14] mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
+                        class="bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                         <!-- image -->
                         <div class="flex-1 bg-[#181C14] border-b-2 border-b-[#FF8200]">
                             <NuxtImg :src="post.post_image_url" alt="image" width="400" height="200" />
@@ -68,7 +68,7 @@ export default {
             posts: [],
             searchQuery: "",
             currentPage: 1,
-            postsPerPage: 5,
+            postsPerPage: 4,
         };
     },
     computed: {
@@ -90,6 +90,7 @@ export default {
     methods: {
         updateSearchQuery(query) {
             this.searchQuery = query
+            this.currentPage = 1;
         },
         prevPage() {
             if (this.currentPage > 1) {

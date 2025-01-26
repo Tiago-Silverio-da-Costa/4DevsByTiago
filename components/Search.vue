@@ -3,8 +3,8 @@
         <input placeholder="Pesquisar" class="border px-3 py-[0.58rem] rounded-tl-md rounded-bl-md w-full"
             v-model="localQuery" @input="emitSearch" />
 
-        <button type="button" class="text-xl bg-[#FF8200] rounded-tr-md rounded-br-md px-6 py-1" @click="emitSearch">
-            <NuxtImg src="/serchbar.svg" alt="Pesquisar" width="40" height="40" />
+        <button type="button" class="text-xl bg-[#FF8200] rounded-tr-md rounded-br-md px-6 py-[0.40rem]" @click="emitSearch">
+            <NuxtImg src="/serchbar.svg" alt="Pesquisar" width="30" height="40" />
         </button>
     </form>
 </template>
