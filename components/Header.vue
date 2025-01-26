@@ -9,6 +9,9 @@
                 <NuxtLink :to="`/login`" class="px-4 py-2 rounded-md bg-[#FF8200] font-bold">Log in</NuxtLink>
                 <NuxtLink :to="`/register`" class="px-4 py-2 rounded-md bg-[#FF8200] font-bold">Sign up</NuxtLink>
             </div>
+            <div v-else class="md:flex items-center gap-2 hidden ">
+                <button @click="logOut" class="px-4 py-2 rounded-md bg-[#FF8200] font-bold">Log out</button>
+            </div>
             <div class="block md:hidden">
                 <NuxtImg src="/menuIcons.svg" alt="image" width="40" height="40" />
             </div>
@@ -31,6 +34,13 @@ export default {
         checkAuthentication() {
             const token = localStorage.getItem("token");
             this.isAuthenticated = !!token;
+        },
+        logOut() {
+            localStorage.removeItem("token")
+            localStorage.removeItem("userId")
+            this.$router.push("/").then(() => {
+                location.reload(); 
+            });
         }
     }
 }
