@@ -49,7 +49,7 @@ export default {
                 localStorage.setItem("token", response.data.results.token);
                 localStorage.setItem("userId", response.data.results.userId);
 
-                // this.$router.push("/");
+                this.$router.push("/");
             } catch (error) {
                 console.error("Error logging in:", error);
                 this.errorMessage = error.response?.data?.message || "An error occured while logging in."

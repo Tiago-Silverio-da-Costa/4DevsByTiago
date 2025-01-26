@@ -1,5 +1,6 @@
 <template>
     <div v-if="post" class="bg-[#3C3D37] text-white">
+        <Header />
         <div class="overflow-hidden h-80 flex items-center mb-20">
             <NuxtImg v-if="post.post_image_url" :src="post.post_image_url" alt="image" width="100%" height="200" />
         </div>
@@ -20,6 +21,7 @@
 
             <Comments :postId="post.id" />
         </div>
+        <Footer />
     </div>
 </template>
 

@@ -1,7 +1,7 @@
 <template>
-    <div class="mt-8">
+    <div class="flex flex-col items-center w-full justify-center mt-8">
         <h2 class="text-2xl font-bold mb-4">Comentários</h2>
-        <div v-if="comments.length" class="space-y-4">
+        <div v-if="comments.length" class=" w-full">
             <div v-for="comment in comments" :key="comment.id"
                 class="p-4 border border-gray-300 rounded-md bg-gray-100">
                 <p class="font-semibold">{{ comment.user_name }}</p>
@@ -10,7 +10,8 @@
             </div>
         </div>
         <div v-else class="text-gray-500">Ainda não há comentários. Seja o primeiro a comentar!</div>
-        <form @submit.prevent="addComment" class="mt-4">
+
+        <form v-if="isAuthenticated" @submit.prevent="addComment" class="w-full mt-4">
             <textarea v-model="newComment" rows="3" placeholder="Escreva seu comentário"
                 class="w-full p-2 border border-gray-300 rounded-md">
             </textarea>
@@ -19,6 +20,9 @@
                 {{ addingComment ? "Enviando..." : "Adicionar Comentário" }}
             </button>
         </form>
+        <NuxtLink v-else :to="`/login`" class="text-gray-500 mt-2">
+            Faça login para adicionar um comentário
+        </NuxtLink>
     </div>
 </template>
 
@@ -38,9 +42,11 @@ export default {
             newComment: "",
             loading: true,
             addingComment: false,
+            isAuthenticated: false
         };
     },
     created() {
+        this.checkAuthentication();
         this.fetchComments();
     },
     methods: {
@@ -82,6 +88,10 @@ export default {
             } finally {
                 this.addingComment = false
             }
+        },
+        checkAuthentication() {
+            const token = localStorage.getItem("token");
+            this.isAuthenticated = !!token;
         }
     },
 
