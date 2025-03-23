@@ -11,6 +11,7 @@
                     </div>
 
 
+
                     <NuxtLink :to="`/${post.id}`" v-for="post in paginationPosts" :key="post.id"
                         class="bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden">
                         <!-- image -->
@@ -32,8 +33,10 @@
                             <span>{{ post.category }}</span>
                         </div>
                     </NuxtLink>
+
                 </div>
             </div>
+
 
             <div v-if="filteredPosts.length > postsPerPage" class="flex justify-center items-center gap-4 mt-8">
                 <button @click="prevPage" :disabled="current === 1"
@@ -49,15 +52,15 @@
                     <NuxtImg src="/right-arrow.svg" alt="image" width="20" height="40" />
 
                 </button>
+
             </div>
         </div>
     </div>
 </template>
 
-
 <script>
-import Search from '@/components/Search.vue';
-import axios from 'axios';
+import Search from "@/components/Search.vue";
+import axios from "axios";
 
 export default {
     components: {
@@ -69,14 +72,12 @@ export default {
             searchQuery: "",
             currentPage: 1,
             postsPerPage: 4,
+
         };
     },
     computed: {
         filteredPosts() {
-            return this.posts.filter((post) =>
-                post.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                post.description.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
+            return this.posts.filter((post) => post.title || post.description);
         },
         paginationPosts() {
             const start = (this.currentPage - 1) * this.postsPerPage;
@@ -114,6 +115,7 @@ export default {
             })
     }
 }
+
 </script>
 
 <style scoped>

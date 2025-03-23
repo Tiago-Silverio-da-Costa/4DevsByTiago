@@ -25,10 +25,11 @@
     </div>
 </template>
 
-
 <script>
+
 import axios from 'axios'
 import Comments from "@/components/comments/Comments.vue";
+
 
 export default {
     components: {
@@ -63,7 +64,11 @@ export default {
             })
             .catch(error => {
                 console.error("Error fetching posts", error)
+
             })
+            .catch((error) => {
+                console.error("Error fetching posts", error);
+            });
     },
     methods: {
         parseContent(content) {
