@@ -6,15 +6,14 @@
             <h1 class="font-bold text-4xl mt-4">{{ post.title }}</h1>
             <p class="mt-4">{{ post.content }}</p>
             <div class="mt-4 text-[#FF8200]">
-                <span>{{ formattedPublicationDate }}</span> | <span>{{ post.category_name }}</span>
+                <span>{{ post.publication_date }}</span> | <span>{{ post.category_name }}</span>
             </div>
         </div>
     </div>
 </template>
 
-
 <script>
-import axios from 'axios'
+import axios from "axios";
 
 export default {
     data() {
@@ -24,23 +23,17 @@ export default {
     },
     created() {
         const id = Number(this.$route.params.id);
-
-        axios.get(`http://127.0.0.1:8080/post/post/${id}`)
-            .then(response => {
-                console.log("Posts fetched:", response.data)
+        axios
+            .get(`http://127.0.0.1:8080/post/post/${id}`)
+            .then((response) => {
                 this.post = response.data.data;
 
-                const publicationDate = new Date(response.data.publication_date)
-                this.formattedPublicationDate = publicationDate.toLocaleDateString("Pt-BR", {
-                    timeZone: "America/Sao_Paulo",
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                });
+                const publicationDate = new Date(response.data.publication_date);
+                this.formattedPublicationDate = publicationDate;
             })
-            .catch(error => {
-                console.error("Error fetching posts", error)
-            })
+            .catch((error) => {
+                console.error("Error fetching posts", error);
+            });
     },
 };
 </script>
