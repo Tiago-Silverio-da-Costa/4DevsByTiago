@@ -26,10 +26,8 @@
 </template>
 
 <script>
-
-import axios from 'axios'
+import axios from "axios";
 import Comments from "@/components/comments/Comments.vue";
-
 
 export default {
     components: {
@@ -38,21 +36,21 @@ export default {
     data() {
         return {
             post: null,
-            introductionContent: '',
-            processedContent: '',
+            introductionContent: "",
+            processedContent: "",
             summary: [],
-            formattedPublicationDate: ''
+            formattedPublicationDate: "",
         };
     },
     created() {
         const id = Number(this.$route.params.id);
 
-        axios.get(`http://127.0.0.1:8080/post/post/${id}`)
-            .then(response => {
+        axios
+            .get(`http://127.0.0.1:8080/post/post/${id}`)
+            .then((response) => {
                 const post = response.data.data;
                 this.post = post;
-
-                const publicationDate = new Date(response.data.publication_date)
+                const publicationDate = new Date(response.data.publication_date);
                 this.formattedPublicationDate = publicationDate.toLocaleDateString("Pt-BR", {
                     timeZone: "America/Sao_Paulo",
                     year: "numeric",
@@ -60,11 +58,10 @@ export default {
                     day: "2-digit",
                 });
 
-                this.parseContent(post.content)
+                this.parseContent(post.content);
             })
-            .catch(error => {
-                console.error("Error fetching posts", error)
-
+            .catch((error) => {
+                console.error("Error fetching posts", error);
             })
             .catch((error) => {
                 console.error("Error fetching posts", error);
@@ -72,7 +69,7 @@ export default {
     },
     methods: {
         parseContent(content) {
-            const lines = content.split('\n');
+            const lines = content.split("\n");
             const newContent = [];
             const introductionContent = [];
             const titles = [];
@@ -81,39 +78,37 @@ export default {
             let isFirstTitleFound = false;
 
             lines.forEach((line, index) => {
-                const isTitle = line.startsWith('<title>');
-                const isImage = line.includes('<image>') && line.includes('</image>');
-                const isCodeStart = line.startsWith('<code>')
-                const isCodeEnd = line.endsWith('</code>');
-                const IsList = line.startsWith('-');
-
+                const isTitle = line.startsWith("<title>");
+                const isImage = line.includes("<image>") && line.includes("</image>");
+                const isCodeStart = line.startsWith("<code>");
+                const isCodeEnd = line.endsWith("</code>");
+                const IsList = line.startsWith("-");
 
                 if (!content) return;
 
-
                 if (isTitle) {
                     isFirstTitleFound = true;
-                    const title = line.replace(/<\/?title>/g, '').trim();
-                    const formattedTitle = title.replace(/\s+/g, '-');
-                    titles.push({ title, formattedTitle });
+                    const title = line.replace(/<\/?title>/g, "").trim();
+                    const formattedTitle = title.replace(/\s+/g, "-");
+                    titles.push({title, formattedTitle});
 
-                    newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2>`)
-                    return
+                    newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2>`);
+                    return;
                 }
 
                 if (!isFirstTitleFound) {
                     if (isImage) {
-                        const imgSrc = line.replace(/<image>|<\/image>/g, '').trim();
+                        const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
                         introductionContent.push(`<img class="w-full" src="${imgSrc}" alt="Introduction Image" />`);
-                        return
+                        return;
                     }
 
-                    introductionContent.push(`<p>${line}</p><br />`)
-                    return
+                    introductionContent.push(`<p>${line}</p><br />`);
+                    return;
                 }
 
                 if (isImage) {
-                    const imgSrc = line.replace(/<image>|<\/image>/g, '').trim();
+                    const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
                     newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
                     return;
                 }
@@ -121,41 +116,41 @@ export default {
                 if (isCodeStart) {
                     isInCodeBlock = true;
 
-                    codeBlockContent.push(line.replace(/<code>/, ''))
-                    return
+                    codeBlockContent.push(line.replace(/<code>/, ""));
+                    return;
                 }
 
                 if (isInCodeBlock) {
                     if (isCodeEnd) {
-                        isInCodeBlock = false
-                        codeBlockContent.push(line.replace(/<\/code>/, ''))
+                        isInCodeBlock = false;
+                        codeBlockContent.push(line.replace(/<\/code>/, ""));
                         newContent.push(
                             `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-white overflow-auto"><code>${codeBlockContent
-                                .join('\n')
-                                .replace(/</g, '&lt;')
-                                .replace(/>/g, '&gt;')}</code></pre>`
+                                .join("\n")
+                                .replace(/</g, "&lt;")
+                                .replace(/>/g, "&gt;")}</code></pre>`
                         );
-                        codeBlockContent = []
+                        codeBlockContent = [];
                     } else {
-                        codeBlockContent.push(line)
+                        codeBlockContent.push(line);
                     }
 
-                    return
+                    return;
                 }
 
                 if (IsList) {
-                    const listItem = line.slice(1).trim()
-                    newContent.push(`<li>${listItem}</li>`)
-                    return
+                    const listItem = line.slice(1).trim();
+                    newContent.push(`<li>${listItem}</li>`);
+                    return;
                 }
 
-                newContent.push(`<p>${line}</p><br />`)
-            })
+                newContent.push(`<p>${line}</p><br />`);
+            });
 
-            this.introductionContent = introductionContent.join('')
-            this.processedContent = newContent.join('')
-            this.summary = titles
-        }
-    }
+            this.introductionContent = introductionContent.join("");
+            this.processedContent = newContent.join("");
+            this.summary = titles;
+        },
+    },
 };
 </script>
