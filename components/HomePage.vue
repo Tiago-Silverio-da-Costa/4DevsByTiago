@@ -30,7 +30,8 @@
                         <!-- footer -->
                         <div class="flex px-8 py-4 items-center justify-between border-t-2 border-t-[#FF8200] text-[#FF8200]">
                             <div class="flex items-center gap-2">
-                                <NuxtImg src="watchIcon.svg" alt="image" width="20" height="20" />
+                                <Icon name="formkit:date" class="text-black w-4 h-4" />
+
                                 <span>{{ post.publication_date }}</span>
                             </div>
                             <span>{{ post.category }}</span>
@@ -40,14 +41,14 @@
             </div>
 
             <div v-if="filteredPosts.length > postsPerPage" class="flex justify-center items-center gap-4 mt-8">
-                <button @click="prevPage" :disabled="current === 1" class="px-4 py-2 bg-[#FF8200] text-white rounded-md font-bold">
-                    <NuxtImg src="/left-arrow.svg" alt="image" width="20" height="40" />
+                <button @click="prevPage" :disabled="current === 1" class="flex items-center justify-center px-2 py-1 bg-[#FF8200] text-white rounded-md font-bold">
+                    <Icon name="iconamoon:arrow-left-2" class="text-black w-6 h-6" />
                 </button>
 
                 <span>Página {{ currentPage }} de {{ totalPages }}</span>
 
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-[#FF8200] text-white rounded-md font-bold">
-                    <NuxtImg src="/right-arrow.svg" alt="image" width="20" height="40" />
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="flex items-center justify-center px-2 py-1 bg-[#FF8200] text-white rounded-md font-bold">
+                    <Icon name="iconamoon:arrow-right-2" class="text-black w-6 h-6" />
                 </button>
             </div>
         </div>

@@ -12,7 +12,7 @@
 
         <form v-if="isAuthenticated" @submit.prevent="addComment" class="w-full mt-4">
             <textarea v-model="newComment" rows="3" placeholder="Escreva seu comentário" class="w-full p-2 border border-gray-300 rounded-md"> </textarea>
-            <button type="submit" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" :disabled="addingComment">
+            <button type="submit" class="mt-2 px-4 py-2 bg-[#FF8200] text-white rounded-md" :disabled="addingComment">
                 {{ addingComment ? "Enviando..." : "Adicionar Comentário" }}
             </button>
         </form>
