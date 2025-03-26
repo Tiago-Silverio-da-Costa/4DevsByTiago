@@ -73,7 +73,10 @@ export default {
     },
     computed: {
         filteredPosts() {
-            return this.posts.filter((post) => post.title || post.description);
+            return this.posts.filter((post) => {
+                const query = this.searchQuery.toLocaleLowerCase();
+                return post.title.toLocaleLowerCase().includes(query) || post.description.toLocaleLowerCase().includes(query);
+            });
         },
         paginationPosts() {
             const start = (this.currentPage - 1) * this.postsPerPage;
@@ -86,6 +89,7 @@ export default {
     },
     methods: {
         updateSearchQuery(query) {
+            console.log("query", query);
             this.searchQuery = query;
             this.currentPage = 1;
         },
