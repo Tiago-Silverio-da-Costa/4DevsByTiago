@@ -12,7 +12,7 @@
                     </div>
 
                     <NuxtLink
-                        :to="`/${post.id}`"
+                        :to="`/post/${post.id}`"
                         v-for="post in paginationPosts"
                         :key="post.id"
                         class="bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden"
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import Search from "@/components/Search.vue";
+import Search from "~/components/Search.vue";
 import axios from "axios";
 
 export default {

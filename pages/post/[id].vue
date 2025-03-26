@@ -27,7 +27,7 @@
 
 <script>
 import axios from "axios";
-import Comments from "@/components/comments/Comments.vue";
+import Comments from "@/components/Comments.vue";
 
 export default {
     components: {
