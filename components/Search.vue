@@ -3,7 +3,7 @@
         <input placeholder="Pesquisar" class="border px-3 py-2 rounded-tl-md rounded-bl-md w-full h-full outline-none" v-model="localQuery" @input="emitSearch" />
 
         <button type="button" class="flex items-center justify-center text-xl bg-[#FF8200] rounded-tr-md rounded-br-md px-6 py-2 h-full flex-shrink-0" @click="emitSearch">
-            <Icon name="ic:baseline-search" class="text-black w-6 h-6" />
+            <Icon name="ic:baseline-search" class="w-6 h-6" />
         </button>
     </form>
 </template>

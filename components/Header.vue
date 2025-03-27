@@ -6,15 +6,24 @@
                 <NuxtImg src="/logo-name.svg" alt="image" width="200" height="200" class="hidden md:block" />
             </NuxtLink>
             <div v-if="!isAuthenticated" class="md:flex items-center gap-2 hidden">
-                <NuxtLink :to="`/home/login`" class="px-4 py-2 rounded-md bg-[#FF8200] font-bold">Log in</NuxtLink>
-                <NuxtLink :to="`/home/register`" class="px-4 py-2 rounded-md bg-[#FF8200] font-bold">Sign up</NuxtLink>
+                <NuxtLink :to="`/home/login`" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
+                    <Icon name="material-symbols:home-outline-rounded" class="w-6 h-6" />
+                    <span>Log in</span>
+                </NuxtLink>
+                <NuxtLink :to="`/home/register`" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
+                    <Icon name="mdi:register-outline" class="w-6 h-6" />
+                    Sign up
+                </NuxtLink>
             </div>
             <div v-else class="md:flex items-center gap-2 hidden">
-                <button @click="logOut" class="px-4 py-2 rounded-md bg-[#FF8200] font-bold">Log out</button>
+                <button @click="logOut" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
+                    <Icon name="material-symbols:logout-rounded" class="w-6 h-6" />
+                    <span>Log out</span>
+                </button>
             </div>
             <div class="block md:hidden">
                 <button @click="modalOpen = true" class="flex items-end justify-center px-2 py-2 rounded-md bg-[#FF8200] font-bold">
-                    <Icon name="material-symbols:menu-rounded" class="bg-black w-6 h-6" />
+                    <Icon name="material-symbols:menu-rounded" class="w-6 h-6" />
                 </button>
             </div>
         </div>
