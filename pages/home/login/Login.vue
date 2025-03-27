@@ -6,9 +6,9 @@
             <form @submit.prevent="handleLogin" class="w-full flex flex-col justify-center items-center mt-8">
                 <input v-model="email" type="email" class="w-full placeholder:pl-4 mt-4" placeholder="Email" required />
                 <input v-model="password" type="password" class="w-full placeholder:pl-4 mt-4" placeholder="Password" required />
-                <NuxtLink :to="`/forgotpassword`" class="text-[#FF8200] font-semibold text-sm mt-2">forgot password? </NuxtLink>
+                <NuxtLink :to="`/home/forgotpassword`" class="text-[#FF8200] font-semibold text-sm mt-2">forgot password? </NuxtLink>
                 <button type="submit" class="w-full px-4 py-2 rounded-md bg-[#FF8200] font-bold mt-4" :disabled="isLoading">{{ isLoading ? "Loading..." : "Enter" }}</button>
-                <NuxtLink :to="`/register`" class="text-[#FF8200] font-semibold text-sm mt-2">don't have an account? </NuxtLink>
+                <NuxtLink :to="`/home/register`" class="text-[#FF8200] font-semibold text-sm mt-2">don't have an account? </NuxtLink>
             </form>
             <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
         </div>
