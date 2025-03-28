@@ -46,7 +46,9 @@ export default {
     methods: {
         async fetchComments() {
             try {
-                const response = await axios.get(`http://127.0.0.1:8080/comments/comments/${this.postId}`);
+                const runtimeConfig = useRuntimeConfig();
+
+                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/comments/${this.postId}`);
                 this.comments = response.data.data.comments;
             } catch (error) {
                 // console.log("Erro ao carregar comentários:", error);

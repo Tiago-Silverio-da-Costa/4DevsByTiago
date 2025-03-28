@@ -28,7 +28,9 @@ export default {
     methods: {
         async handleSubmit() {
             try {
-                const response = await axios.post("http://127.0.0.1:8080/api/register", {
+                const runtimeConfig = useRuntimeConfig();
+
+                const response = await axios.post(`${runtimeConfig.public.apiBase}/api/register`, {
                     name: this.name,
                     email: this.email,
                     password: this.password,

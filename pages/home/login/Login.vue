@@ -40,7 +40,9 @@ export default {
             };
 
             try {
-                const response = await axios.post("http://127.0.0.1:8080/user/login", dataSend);
+                const runtimeConfig = useRuntimeConfig();
+
+                const response = await axios.post(`${runtimeConfig.public.apiBase}/user/login`, dataSend);
                 localStorage.setItem("token", response.data.results.token);
                 localStorage.setItem("userId", response.data.results.userId);
 
