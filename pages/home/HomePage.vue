@@ -105,8 +105,10 @@ export default {
         },
     },
     mounted() {
+        const runtimeConfig = useRuntimeConfig();
+
         axios
-            .get("http://127.0.0.1:8080/post/post")
+            .get(`${runtimeConfig.public.apiBase}/post/post`)
             .then((response) => {
                 this.posts = response.data.data;
                 console.log("postg", response.data.data);

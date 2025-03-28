@@ -44,9 +44,10 @@ export default {
     },
     created() {
         const id = Number(this.$route.params.id);
+        const runtimeConfig = useRuntimeConfig();
 
         axios
-            .get(`http://127.0.0.1:8080/post/post/${id}`)
+            .get(`${runtimeConfig.public.apiBase}/post/post/${id}`)
             .then((response) => {
                 const post = response.data.data;
                 this.post = post;
