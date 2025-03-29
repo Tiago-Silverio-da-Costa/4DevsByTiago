@@ -3,6 +3,8 @@ import {ref} from "vue";
 import axios from "axios";
 import {useForm, defineRule, configure} from "vee-validate";
 import * as yup from "yup";
+import {useToast} from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 const registerSchema = yup.object({
     name: yup.string().required("Name is required"),
@@ -17,8 +19,8 @@ const [email, emailAttrs] = defineField("email");
 const [password, passwordAttrs] = defineField("password");
 
 const isLoading = ref(false);
-const errorMessage = ref("");
 const showPassword = ref(false);
+const toast = useToast();
 
 const togglePassword = () => {
     showPassword.value = !showPassword.value;
@@ -26,7 +28,6 @@ const togglePassword = () => {
 
 const onSubmit = handleSubmit(async (values) => {
     isLoading.value = true;
-    errorMessage.value = "";
 
     const dataSend = {
         user: {
@@ -41,10 +42,12 @@ const onSubmit = handleSubmit(async (values) => {
         const response = await axios.post(`${runtimeConfig.public.apiBase}/user/register`, dataSend);
 
         if (response.status === 200 || response.status === 201) {
-            // do something
+            toast.success("Cadastro realizado com sucesso!");
+            navigateTo("/home/login");
         }
     } catch (error) {
-        errorMessage.value = error.response?.data?.message || "An error occured while logging in";
+        const errorMessage = error.response?.data?.message || "An error occured while logging in";
+        toast.error(errorMessage);
     } finally {
         isLoading.value = false;
     }

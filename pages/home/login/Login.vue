@@ -41,7 +41,6 @@ const onSubmit = handleSubmit(async (values) => {
         if (response.status === 200 || response.status === 201) {
             toast.success("Acesso bem-sucedido!");
             localStorage.setItem("token", response.data.results.token);
-            localStorage.setItem("userId", response.data.results.userId);
             navigateTo("/home");
         }
     } catch (error) {
