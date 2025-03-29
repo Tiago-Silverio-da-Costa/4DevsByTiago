@@ -4,15 +4,15 @@ import axios from "axios";
 import {useForm, defineRule, configure} from "vee-validate";
 import * as yup from "yup";
 
-const schema = yup.object({
+const loginSchema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
     password: yup.string().min(6, "At least 6 characters").required("Password is required"),
 });
 
-const {defineField, handleSubmit, errors} = useForm({validationSchema: schema});
+const {defineField, handleSubmit, errors} = useForm({validationSchema: loginSchema});
 
 const [email, emailAttrs] = defineField("email");
-const [password, passwrodAttrs] = defineField("password");
+const [password, passwordAttrs] = defineField("password");
 
 const isLoading = ref(false);
 const errorMessage = ref("");
@@ -23,7 +23,6 @@ const togglePassword = () => {
 };
 
 const onSubmit = handleSubmit(async (values) => {
-    console.log(values);
     isLoading.value = true;
     errorMessage.value = "";
 
@@ -38,58 +37,17 @@ const onSubmit = handleSubmit(async (values) => {
         const runtimeConfig = useRuntimeConfig();
         const response = await axios.post(`${runtimeConfig.public.apiBase}/user/login`, dataSend);
 
-        localStorage.setItem("token", response.data.results.token);
-        localStorage.setItem("userId", response.data.results.userId);
-
-        navigateTo("/home");
+        if (response.status === 200 || response.status === 201) {
+            localStorage.setItem("token", response.data.results.token);
+            localStorage.setItem("userId", response.data.results.userId);
+            navigateTo("/home");
+        }
     } catch (error) {
         errorMessage.value = error.response?.data?.message || "An error occured while logging in";
     } finally {
         isLoading.value = false;
     }
 });
-
-// export default {
-//     data() {
-//         return {
-//             email: "",
-//             password: "",
-//             isLoading: false,
-//             errorMessage: "",
-//             showPassword: false,
-//         };
-//     },
-//     methods: {
-//         togglePassword() {
-//             this.showPassword = !this.showPassword;
-//         },
-//         async handleLogin() {
-//             this.isLoading = true;
-//             this.errorMessage = "";
-
-//             const dataSend = {
-//                 user: {
-//                     email: this.email,
-//                     password: this.password,
-//                 },
-//             };
-
-//             try {
-//                 const runtimeConfig = useRuntimeConfig();
-
-//                 const response = await axios.post(`${runtimeConfig.public.apiBase}/user/login`, dataSend);
-//                 localStorage.setItem("token", response.data.results.token);
-//                 localStorage.setItem("userId", response.data.results.userId);
-
-//                 this.$router.push("/");
-//             } catch (error) {
-//                 this.errorMessage = error.response?.data?.message || "An error occured while logging in.";
-//             } finally {
-//                 this.isLoading = false;
-//             }
-//         },
-//     },
-// };
 </script>
 
 <template>
@@ -130,7 +88,17 @@ const onSubmit = handleSubmit(async (values) => {
                 </div>
 
                 <NuxtLink :to="`/home/forgotpassword`" class="text-[#FF8200] font-semibold text-sm mt-2">forgot password? </NuxtLink>
-                <button type="submit" class="w-full px-4 py-2 rounded-md bg-[#FF8200] font-bold mt-4" :disabled="isLoading">{{ isLoading ? "Loading..." : "Log in " }}</button>
+                <button
+                    :disabled="isLoading"
+                    :class="{
+                        'bg-[#FF8200] text-black': !isLoading,
+                        'bg-gray-400 cursor-not-allowed': isLoading,
+                    }"
+                    class="w-full px-4 py-2 rounded-md bg-[#FF8200] font-bold mt-4"
+                >
+                    <Icon v-if="isLoading" name="mdi:loading" class="animate-spin text-2xl" />
+                    <span v-else>Register</span>
+                </button>
                 <NuxtLink :to="`/home/register`" class="text-[#FF8200] font-semibold text-sm mt-2">don't have an account? </NuxtLink>
             </form>
             <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
