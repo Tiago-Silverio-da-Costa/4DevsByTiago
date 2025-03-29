@@ -56,11 +56,11 @@
 
             <div v-if="filteredPosts.length > postsPerPage" class="flex justify-center items-center gap-4 mt-8">
                 <button @click="prevPage" :disabled="current === 1" class="flex items-center justify-center px-2 py-1 bg-[#FF8200] text-white rounded-md font-bold">
-                    <Icon name="iconamoon:arrow-left-2" class="bg-white w-6 h-6" />
+                    <Icon name="iconamoon:arrow-left-2" class="bg-black w-6 h-6" />
                 </button>
                 <span>Página {{ currentPage }} de {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages" class="flex items-center justify-center px-2 py-1 bg-[#FF8200] text-white rounded-md font-bold">
-                    <Icon name="iconamoon:arrow-right-2" class="bg-white w-6 h-6" />
+                    <Icon name="iconamoon:arrow-right-2" class="bg-black w-6 h-6" />
                 </button>
             </div>
         </div>

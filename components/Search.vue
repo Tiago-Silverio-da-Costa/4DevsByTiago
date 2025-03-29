@@ -7,7 +7,7 @@
             class="flex items-center justify-center text-xl bg-[#FF8200] rounded-tr-md rounded-br-md px-6 min-h-[2.55rem] outline-none active:bg-[#FF8200] h-full flex-shrink-0"
             @click="emitSearch"
         >
-            <Icon name="ic:baseline-search" class="bg-white w-6 h-6" />
+            <Icon name="ic:baseline-search" class="bg-black w-6 h-6" />
         </button>
     </form>
 </template>
