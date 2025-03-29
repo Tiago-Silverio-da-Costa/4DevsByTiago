@@ -1,5 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  build: {
+    // vue-toastification - old commonjs module 
+    transpile: ['vue-toastification'],
+  },
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_BASE_URL_PRINCIPAL

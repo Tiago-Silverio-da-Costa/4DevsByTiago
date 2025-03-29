@@ -3,6 +3,8 @@ import {ref} from "vue";
 import axios from "axios";
 import {useForm, defineRule, configure} from "vee-validate";
 import * as yup from "yup";
+import {useToast} from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 const loginSchema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -15,8 +17,8 @@ const [email, emailAttrs] = defineField("email");
 const [password, passwordAttrs] = defineField("password");
 
 const isLoading = ref(false);
-const errorMessage = ref("");
 const showPassword = ref(false);
+const toast = useToast();
 
 const togglePassword = () => {
     showPassword.value = !showPassword.value;
@@ -24,7 +26,6 @@ const togglePassword = () => {
 
 const onSubmit = handleSubmit(async (values) => {
     isLoading.value = true;
-    errorMessage.value = "";
 
     const dataSend = {
         user: {
@@ -38,12 +39,15 @@ const onSubmit = handleSubmit(async (values) => {
         const response = await axios.post(`${runtimeConfig.public.apiBase}/user/login`, dataSend);
 
         if (response.status === 200 || response.status === 201) {
+            toast.success("Acesso bem-sucedido!");
             localStorage.setItem("token", response.data.results.token);
             localStorage.setItem("userId", response.data.results.userId);
             navigateTo("/home");
         }
     } catch (error) {
-        errorMessage.value = error.response?.data?.message || "An error occured while logging in";
+        console.log("error", error);
+        const errorMessage = error.response?.data?.message || "Ocorreu um erro ao tentar acessar!";
+        toast.error(errorMessage);
     } finally {
         isLoading.value = false;
     }
@@ -97,11 +101,10 @@ const onSubmit = handleSubmit(async (values) => {
                     class="w-full px-4 py-2 rounded-md bg-[#FF8200] font-bold mt-4"
                 >
                     <Icon v-if="isLoading" name="mdi:loading" class="animate-spin text-2xl" />
-                    <span v-else>Register</span>
+                    <span v-else>Log in</span>
                 </button>
                 <NuxtLink :to="`/home/register`" class="text-[#FF8200] font-semibold text-sm mt-2">don't have an account? </NuxtLink>
             </form>
-            <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
         </div>
     </section>
 </template>
