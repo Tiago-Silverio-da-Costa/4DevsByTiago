@@ -59,8 +59,8 @@ export default {
         async addComment() {
             if (!this.newComment.trim()) return;
 
-            const token = localStorage.getItem("token");
-            const user_id = localStorage.getItem("userId");
+            const token = sessionStorage.getItem("token");
+            const user_id = sessionStorage.getItem("userId");
 
             this.addingComment = true;
 
@@ -89,7 +89,7 @@ export default {
             }
         },
         checkAuthentication() {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             this.isAuthenticated = !!token;
         },
     },

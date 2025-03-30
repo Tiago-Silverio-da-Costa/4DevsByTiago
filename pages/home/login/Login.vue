@@ -40,7 +40,9 @@ const onSubmit = handleSubmit(async (values) => {
 
         if (response.status === 200 || response.status === 201) {
             toast.success("Acesso bem-sucedido!");
-            localStorage.setItem("token", response.data.results.token);
+            console.log("response.data.results", response.data.results.user_id);
+            sessionStorage.setItem("token", response.data.results.token);
+            sessionStorage.setItem("userId", response.data.results.user_id);
             navigateTo("/");
         }
     } catch (error) {

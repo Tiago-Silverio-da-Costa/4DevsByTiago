@@ -56,12 +56,12 @@ export default {
     },
     methods: {
         checkAuthentication() {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             this.isAuthenticated = !!token;
         },
         logOut() {
-            localStorage.removeItem("token");
-            localStorage.removeItem("userId");
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("userId");
             this.$router.push("/").then(() => {
                 location.reload();
             });
