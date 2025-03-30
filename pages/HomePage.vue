@@ -32,17 +32,15 @@
                         :key="post.id"
                         class="flex flex-col bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden"
                     >
-                        <!-- image -->
                         <div class="bg-[#181C14] border-b-2 border-b-[#FF8200]">
                             <NuxtImg :src="post.post_image_url" alt="image" width="400" height="200" />
                         </div>
 
-                        <!-- body -->
                         <div class="flex flex-col gap-4 px-8 py-4 min-h-[11.5rem]">
                             <h2 class="font-bold text-2xl">{{ post.title }}</h2>
                             <p class="text-md flex max-w-md">{{ post.description }}</p>
                         </div>
-                        <!-- footer -->
+
                         <div class="flex px-8 py-4 items-center justify-between border-t-2 border-t-[#FF8200] text-[#FF8200]">
                             <div class="flex items-center gap-2">
                                 <Icon name="formkit:date" class="w-4 h-4" />
