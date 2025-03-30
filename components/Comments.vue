@@ -48,7 +48,7 @@ export default {
             try {
                 const runtimeConfig = useRuntimeConfig();
 
-                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/comments/${this.postId}`);
+                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${this.postId}`);
                 this.comments = response.data.data.comments;
             } catch (error) {
                 // console.log("Erro ao carregar comentários:", error);
@@ -63,10 +63,11 @@ export default {
             const user_id = sessionStorage.getItem("userId");
 
             this.addingComment = true;
+            const runtimeConfig = useRuntimeConfig();
 
             try {
                 await axios.post(
-                    `http://127.0.0.1:8080/comments/comments`,
+                    `${runtimeConfig.public.apiBase}/comments`,
                     {
                         comment: {
                             post_id: this.postId,
