@@ -8,17 +8,17 @@
             <div v-if="!isAuthenticated" class="md:flex items-center gap-2 hidden">
                 <NuxtLink :to="`/home/login`" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
                     <Icon name="material-symbols:home-outline-rounded" class="bg-black w-6 h-6" />
-                    <span>Log in</span>
+                    <span class="text-black">Log in</span>
                 </NuxtLink>
                 <NuxtLink :to="`/home/register`" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
                     <Icon name="mdi:register-outline" class="bg-black w-6 h-6" />
-                    Sign up
+                    <spas class="text-black">Sign up</spas>
                 </NuxtLink>
             </div>
             <div v-else class="md:flex items-center gap-2 hidden">
                 <button @click="logOut" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
                     <Icon name="material-symbols:logout-rounded" class="bg-black w-6 h-6" />
-                    <span>Log out</span>
+                    <span class="text-black">Log out</span>
                 </button>
             </div>
             <div class="block md:hidden">
