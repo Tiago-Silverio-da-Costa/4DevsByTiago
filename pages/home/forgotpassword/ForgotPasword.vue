@@ -11,19 +11,22 @@ const forgotPasswordStore = useForgotPasswordStore();
 const toast = useToast();
 
 const emailSchema = yup.object({
-    email: yup.string().email("Invalid email").required("Email is required"),
+    email: yup.string().email("email inválido").required("Campo obrigatório"),
 });
 
 const codeSchema = yup.object({
-    code: yup.string().required("Verification code is required"),
+    code: yup
+        .string()
+        .matches(/^[A-Z0-9]{5}$/, "O código deve ter 5 caracteres alfanuméricos")
+        .required("O código de verificação é obrigatório"),
 });
 
 const passwordSchema = yup.object({
-    password: yup.string().min(6, "At least 6 characters").required("Password is required"),
+    password: yup.string().min(6, "Mínimo de 6 caracteres").required("Campo obrigatório"),
     confirmPassword: yup
         .string()
-        .oneOf([yup.ref("password"), null], "Passwords must match")
-        .required("Confirm password is required"),
+        .oneOf([yup.ref("password"), null], "senhas não são iguais")
+        .required("Confirmação é um campo obrigatório"),
 });
 
 const {handleSubmit: handleEmailSubmit} = useForm({
@@ -54,10 +57,10 @@ const onSubmitEmail = handleEmailSubmit(async (values) => {
     try {
         const runtimeConfig = useRuntimeConfig();
         await axios.post(`${runtimeConfig.public.apiBase}/user/fg/send/email`, {email: values.email});
-        localStorage.setItem("fg-email", values.email);
+        sessionStorage.setItem("fg-email", values.email);
         forgotPasswordStore.nextStep(2);
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Failed to send verification code.";
+        const errorMessage = error.response?.data?.message || "Algo deu errado. Tente novamente.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
@@ -68,13 +71,15 @@ const onSubmitCode = handleCodeSubmit(async (values) => {
     isLoading.value = true;
     try {
         const runtimeConfig = useRuntimeConfig();
-        const fgEmail = localStorage.getItem("fg-email");
+        const fgEmail = sessionStorage.getItem("fg-email");
         const response = await axios.post(`${runtimeConfig.public.apiBase}/user/fg/check/code`, {email: fgEmail, code: values.code});
-        localStorage.setItem("fg-token", response.data.results);
+        const tokenExpiration = Date.now() + 15 * 60 * 1000;
+        sessionStorage.setItem("fg-token-expiration", tokenExpiration);
+        sessionStorage.setItem("fg-token", response.data.results);
         toast.success("Code verified successfully.");
         forgotPasswordStore.nextStep(3);
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Invalid verification code.";
+        const errorMessage = error.response?.data?.message || "Algo deu errado. Tente novamente.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
@@ -84,8 +89,13 @@ const onSubmitCode = handleCodeSubmit(async (values) => {
 const onSubmitPassword = handlePasswordSubmit(async (values) => {
     isLoading.value = true;
     try {
+        const expiration = sessionStorage.getItem("fg-token-expiration");
+        if (Date.now() > expiration) {
+            toast.error("Token expirado. Por favor, solicite um novo código.");
+            return;
+        }
         const runtimeConfig = useRuntimeConfig();
-        const fgtoken = localStorage.getItem("fg-token");
+        const fgtoken = sessionStorage.getItem("fg-token");
 
         await axios.post(
             `${runtimeConfig.public.apiBase}/user/fg/update/password`,
@@ -98,11 +108,12 @@ const onSubmitPassword = handlePasswordSubmit(async (values) => {
         );
         toast.success("Password reset successfully.");
         forgotPasswordStore.resetStep();
-        localStorage.removeItem("fg-token");
-        localStorage.removeItem("fg-email");
+        sessionStorage.removeItem("fg-token");
+        sessionStorage.removeItem("fg-email");
+        sessionStorage.removeItem("fg-token-expiration");
         navigateTo("/home/login");
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Failed to reset password.";
+        const errorMessage = error.response?.data?.message || "Algo deu errado. Tente novamente.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
