@@ -6,7 +6,6 @@
         </div>
 
         <div class="mx-auto w-5/6 max-w-3xl py-4">
-            <!-- <span class="font-bold text-xl mt-2">Autor: {{ post.author_name }}</span> -->
             <h1 class="font-bold text-4xl mt-4">{{ post.title }}</h1>
             <div class="mt-4" v-html="introductionContent"></div>
             <ul class="mt-4 list-disc list-inside text-[#FF8200]" v-if="summary.length">
@@ -43,15 +42,15 @@ export default {
         };
     },
     created() {
-        const id = Number(this.$route.params.id);
+        const slug = this.$route.params.slug;
         const runtimeConfig = useRuntimeConfig();
 
         axios
-            .get(`${runtimeConfig.public.apiBase}/post/post/${id}`)
+            .get(`${runtimeConfig.public.apiBase}/post/slug/${slug}`)
             .then((response) => {
                 const post = response.data.data;
                 this.post = post;
-                const publicationDate = new Date(response.data.publication_date);
+                const publicationDate = new Date(response.publication_date);
                 this.formattedPublicationDate = publicationDate.toLocaleDateString("Pt-BR", {
                     timeZone: "America/Sao_Paulo",
                     year: "numeric",

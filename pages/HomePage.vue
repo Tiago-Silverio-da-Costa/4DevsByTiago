@@ -27,7 +27,7 @@
                     </div>
 
                     <NuxtLink
-                        :to="`/post/${post.id}`"
+                        :to="`/post/${post.slug}`"
                         v-for="post in paginationPosts"
                         :key="post.id"
                         class="flex flex-col bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden"
@@ -114,7 +114,6 @@ export default {
     },
     methods: {
         updateSearchQuery(query) {
-            console.log("query", query);
             this.searchQuery = query;
             this.currentPage = 1;
         },
@@ -133,10 +132,9 @@ export default {
         const runtimeConfig = useRuntimeConfig();
 
         axios
-            .get(`${runtimeConfig.public.apiBase}/post/post`)
+            .get(`${runtimeConfig.public.apiBase}/post`)
             .then((response) => {
                 this.posts = response.data.data;
-                console.log("postg", response.data.data);
             })
             .catch((error) => {
                 console.error("Error fetching posts", error);
