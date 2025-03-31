@@ -21,7 +21,7 @@
                 <div class="flex flex-wrap gap-5 justify-center items-stretch w-full">
                     <div
                         v-if="searchQuery && filteredPosts.length === 0"
-                        class="flex justify-center self-center items-center text-center text-xl font-bold bg-[#FF8200] text-white px-8 py-4 h-fit rounded-md mt-8"
+                        class="flex justify-center self-center items-center text-black text-center text-xl font-bold bg-[#FF8200] px-8 py-4 h-fit rounded-md mt-8"
                     >
                         Nenhum resultado encontrado.
                     </div>

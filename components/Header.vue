@@ -1,5 +1,5 @@
 <template>
-    <header class="bg-[#181C14]">
+    <header class="flex items-center bg-[#181C14]">
         <div class="flex md:row items-center justify-between gap-2 py-4 w-5/6 max-w-4xl mx-auto text-black">
             <NuxtLink :to="`/`" class="flex items-center justify-center gap-2">
                 <NuxtImg src="/logo-no-name.svg" alt="image" width="40" height="40" />
