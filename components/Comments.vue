@@ -1,27 +1,31 @@
 <template>
-    <div class="flex flex-col items-center w-full justify-center mt-8">
-        <h2 class="text-2xl font-bold mb-4">Comentários</h2>
-        <div v-if="comments.length" class="w-full">
-            <div v-for="comment in comments" :key="comment.id" class="p-4 border border-gray-300 rounded-md bg-gray-100">
-                <p class="font-semibold">{{ comment.user_name }}</p>
+    <div class="flex flex-col items-start w-full justify-center mt-8">
+        <h2 class="text-2xl font-bold mb-4">{{ comments.length }} Comentários</h2>
+        <form v-if="isAuthenticated" @submit.prevent="addComment" class="w-full mt-4">
+            <textarea v-model="newComment" rows="1" placeholder="Adicionar um comentário..." class="w-full p-2 border border-[#3c4143] bg-[#1e2022] outline-none rounded-md">
+            </textarea>
+            <button type="submit" class="mt-2 px-4 py-2 bg-[#FF8200] text-white rounded-md" :disabled="addingComment">
+                {{ addingComment ? "Enviando..." : "Comentar" }}
+            </button>
+        </form>
+        <div v-if="comments.length" class="w-full mt-4">
+            <div v-for="comment in comments" :key="comment.id" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022]">
+                <div class="flex items-center gap-2">
+                    <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
+                </div>
                 <p class="mt-2">{{ comment.content }}</p>
-                <p class="text-sm text-gray-500 mt-1">{{ new Date(comment.created_at).toLocaleDateString("pt-BR") }}</p>
             </div>
         </div>
         <div v-else class="text-gray-500">Ainda não há comentários. Seja o primeiro a comentar!</div>
 
-        <form v-if="isAuthenticated" @submit.prevent="addComment" class="w-full mt-4">
-            <textarea v-model="newComment" rows="3" placeholder="Escreva seu comentário" class="w-full p-2 border border-gray-300 rounded-md"> </textarea>
-            <button type="submit" class="mt-2 px-4 py-2 bg-[#FF8200] text-white rounded-md" :disabled="addingComment">
-                {{ addingComment ? "Enviando..." : "Adicionar Comentário" }}
-            </button>
-        </form>
         <NuxtLink v-else :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
     </div>
 </template>
 
 <script>
 import axios from "axios";
+import moment from "moment-timezone";
 
 export default {
     props: {
@@ -48,7 +52,7 @@ export default {
             try {
                 const runtimeConfig = useRuntimeConfig();
 
-                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/comments/${this.postId}`);
+                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${this.postId}`);
                 this.comments = response.data.data.comments;
             } catch (error) {
                 // console.log("Erro ao carregar comentários:", error);
@@ -59,14 +63,15 @@ export default {
         async addComment() {
             if (!this.newComment.trim()) return;
 
-            const token = localStorage.getItem("token");
-            const user_id = localStorage.getItem("userId");
+            const token = sessionStorage.getItem("token");
+            const user_id = sessionStorage.getItem("userId");
 
             this.addingComment = true;
+            const runtimeConfig = useRuntimeConfig();
 
             try {
                 await axios.post(
-                    `http://127.0.0.1:8080/comments/comments`,
+                    `${runtimeConfig.public.apiBase}/comments`,
                     {
                         comment: {
                             post_id: this.postId,
@@ -89,8 +94,25 @@ export default {
             }
         },
         checkAuthentication() {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             this.isAuthenticated = !!token;
+        },
+        timeAgo(createdAt) {
+            const now = moment().tz("America/Sao_Paulo");
+            const past = moment(createdAt).tz("America/Sao_Paulo");
+            const diffSeconds = now.diff(past, "seconds");
+
+            if (diffSeconds < 60) return "agora mesmo";
+            const diffMinutes = now.diff(past, "minutes");
+            if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
+            const diffHours = now.diff(past, "hours");
+            if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
+            const diffDays = now.diff(past, "days");
+            if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
+            const diffMonths = now.diff(past, "months");
+            if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
+            const diffYears = now.diff(past, "years");
+            return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
         },
     },
 };
