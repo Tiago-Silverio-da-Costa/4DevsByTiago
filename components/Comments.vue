@@ -51,7 +51,6 @@ export default {
         async fetchComments() {
             try {
                 const runtimeConfig = useRuntimeConfig();
-
                 const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${this.postId}`);
                 this.comments = response.data.data.comments;
             } catch (error) {
@@ -98,20 +97,26 @@ export default {
             this.isAuthenticated = !!token;
         },
         timeAgo(createdAt) {
-            const now = moment().tz("America/Sao_Paulo");
-            const past = moment(createdAt).tz("America/Sao_Paulo");
-            const diffSeconds = now.diff(past, "seconds");
+            const now = new Date();
+            const past = new Date(createdAt);
+            const diffMs = now - past;
 
+            const diffSeconds = Math.floor(diffMs / 1000);
             if (diffSeconds < 60) return "agora mesmo";
-            const diffMinutes = now.diff(past, "minutes");
+
+            const diffMinutes = Math.floor(diffSeconds / 60);
             if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
-            const diffHours = now.diff(past, "hours");
+
+            const diffHours = Math.floor(diffMinutes / 60);
             if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
-            const diffDays = now.diff(past, "days");
+
+            const diffDays = Math.floor(diffHours / 24);
             if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
-            const diffMonths = now.diff(past, "months");
+
+            const diffMonths = Math.floor(diffDays / 30);
             if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
-            const diffYears = now.diff(past, "years");
+
+            const diffYears = Math.floor(diffDays / 365);
             return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
         },
     },
