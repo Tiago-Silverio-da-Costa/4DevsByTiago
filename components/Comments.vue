@@ -21,11 +21,15 @@
                 </button> -->
                 <textarea
                     v-model="newComment"
-                    rows="1"
+                    :rows="textareaRows"
+                    @input="adjustRows"
+                    @focus="showSubmitButton = true"
+                    @blur="checkSubmitButtonVisibility"
                     class="overflow-hidden resize-none block mr-2 p-2.5 w-full text-sm rounded-lg border outline-none text-gray-900 bg-[#27292b] border-[#1e2022] focus:ring-[#FF8200] focus:border-[#FF8200] dark:border-gray-600 dark:placeholder-white dark:text-white"
                     placeholder="Adicionar um comentário..."
                 ></textarea>
                 <button
+                    v-if="showSubmitButton"
                     type="submit"
                     class="inline-flex justify-center p-2 text-blue-[#FF8200] rounded-full cursor-pointer hover:bg-blue-100 dark:text-[#FF8200] dark:hover:bg-gray-600"
                     :disabled="addingComment"
@@ -39,23 +43,28 @@
         </form>
 
         <div v-if="comments.length" class="w-full mt-4">
-            <div v-for="comment in comments" :key="comment.id" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022]">
-                <div class="flex items-center gap-2">
-                    <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
-                    <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
+            <div class="flex gap-2 mb-4">
+                <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais recentes</button>
+                <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
+            </div>
+            <div v-if="comments.length">
+                <div v-for="comment in sortedComments" :key="comment.id" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022]">
+                    <div class="flex items-center gap-2">
+                        <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
+                    </div>
+                    <p class="mt-2">{{ comment.content }}</p>
                 </div>
-                <p class="mt-2">{{ comment.content }}</p>
             </div>
         </div>
         <div v-else class="text-gray-500">Ainda não há comentários. Seja o primeiro a comentar!</div>
 
-        <NuxtLink v-else :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
+        <NuxtLink v-if="!isAuthenticated" :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
     </div>
 </template>
 
 <script>
 import axios from "axios";
-import moment from "moment-timezone";
 
 export default {
     props: {
@@ -71,13 +80,43 @@ export default {
             loading: true,
             addingComment: false,
             isAuthenticated: false,
+            textareaRows: 1,
+            showSubmitButton: false,
+            sortOrder: "recent",
         };
+    },
+    computed: {
+        sortedComments() {
+            return [...this.comments].sort((a, b) => {
+                const dateA = new Date(a.created_at);
+                const dateB = new Date(b.created_at);
+                console.log("dateB", dateB);
+                return this.sortOrder === "recent" ? dateB - dateA : dateA - dateB;
+            });
+        },
     },
     created() {
         this.checkAuthentication();
         this.fetchComments();
     },
     methods: {
+        adjustRows() {
+            const charPerRow = 114;
+            const minRows = 1;
+            const maxRows = 5;
+            const charCount = this.newComment.length;
+            const calculatedRows = Math.max(minRows, Math.min(maxRows, Math.ceil(charCount / charPerRow)));
+            this.textareaRows = calculatedRows;
+        },
+        checkSubmitButtonVisibility() {
+            this.showSubmitButton = false;
+            if (this.newComment.trim()) {
+                this.showSubmitButton = false;
+            }
+        },
+        sortComments(order) {
+            this.sortOrder = order;
+        },
         async fetchComments() {
             try {
                 const runtimeConfig = useRuntimeConfig();
@@ -115,6 +154,8 @@ export default {
                     }
                 );
                 this.newComment = "";
+                this.textareaRows = 1;
+                this.showSubmitButton = false;
                 this.fetchComments();
             } catch (error) {
                 // console.error("Erro ao adicionar comentário:", error);
