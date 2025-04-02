@@ -10,7 +10,7 @@ import CommentItem from "./CommentItem.vue";
 const toast = useToast();
 
 const commentSchema = yup.object().shape({
-    comment: yup.string().trim().strict(true).min(10, "Insira algo").max(200, "Máximo de 200 caracteres"),
+    comment: yup.string().trim().max(200, "Máximo de 200 caracteres"),
 });
 
 const {defineField, handleSubmit, errors, resetForm} = useForm({
@@ -35,6 +35,8 @@ const showSubmitButton = ref(false);
 const sortOrder = ref("recent");
 
 const buildCommentTree = (comments, parentId = null) => {
+    console.log("comments", comments);
+    console.log("parentId", parentId);
     return comments
         .filter((comment) => comment.parent_id === parentId)
         .map((comment) => ({
@@ -213,29 +215,13 @@ onMounted(() => {
             <p v-if="errors.comment" class="text-red-500 text-sm mt-1">{{ errors.comment }}</p>
         </form>
 
-        <!-- <div v-if="commentTree.length" class="w-full mt-4">
+        <div v-if="comments.length" class="w-full mt-4">
             <div class="flex gap-2 mb-4">
                 <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais recentes</button>
                 <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
             </div>
             <div>
                 <CommentItem v-for="comment in commentTree" :key="comment.id" :comment="comment" :level="0" :post-id="postId" @refresh-comments="fetchComments" />
-            </div>
-        </div> -->
-
-        <div v-if="comments.length" class="w-full mt-4">
-            <div class="flex gap-2 mb-4">
-                <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais recentes</button>
-                <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
-            </div>
-            <div v-if="comments.length">
-                <div v-for="comment in sortedComments" :key="comment.id" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022]">
-                    <div class="flex items-center gap-2">
-                        <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
-                        <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
-                    </div>
-                    <p class="mt-2 break-words">{{ comment.content }}</p>
-                </div>
             </div>
         </div>
 

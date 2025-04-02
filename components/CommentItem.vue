@@ -64,7 +64,7 @@ const submitReply = async () => {
                     post_id: props.postId,
                     content: replyContent.value,
                     user_id: Number(user_id),
-                    parent_id: props.comment.id, // Define o parent_id para a resposta
+                    parent_id: props.comment.id,
                 },
             },
             {
