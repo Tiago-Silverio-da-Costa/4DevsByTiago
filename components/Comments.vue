@@ -5,6 +5,7 @@ import {useForm} from "vee-validate";
 import * as yup from "yup";
 import {useToast} from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import CommentItem from "./CommentItem.vue";
 
 const toast = useToast();
 
@@ -32,6 +33,24 @@ const isAuthenticated = ref(false);
 const textareaRows = ref(1);
 const showSubmitButton = ref(false);
 const sortOrder = ref("recent");
+
+const buildCommentTree = (comments, parentId = null) => {
+    return comments
+        .filter((comment) => comment.parent_id === parentId)
+        .map((comment) => ({
+            ...comment,
+            replies: buildCommentTree(comments, comment.id),
+        }));
+};
+
+const commentTree = computed(() => {
+    const sorted = [...comments.value].sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return sortOrder.value === "recent" ? dateB - dateA : dateA - dateB;
+    });
+    return buildCommentTree(sorted);
+});
 
 const sortedComments = computed(() => {
     return [...comments.value].sort((a, b) => {
@@ -63,6 +82,7 @@ const onSubmit = handleSubmit(async (values) => {
                     post_id: props.postId,
                     content: values.comment,
                     user_id: Number(user_id),
+                    parent_id: null,
                 },
             },
             {
@@ -169,6 +189,7 @@ onMounted(() => {
                     <span class="sr-only">Add emoji</span>
                 </button> -->
                 <textarea
+                    id="comments"
                     v-model="commentValidation"
                     v-bind="commentValidationAttrs"
                     :rows="textareaRows"
@@ -191,6 +212,16 @@ onMounted(() => {
             </div>
             <p v-if="errors.comment" class="text-red-500 text-sm mt-1">{{ errors.comment }}</p>
         </form>
+
+        <!-- <div v-if="commentTree.length" class="w-full mt-4">
+            <div class="flex gap-2 mb-4">
+                <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais recentes</button>
+                <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
+            </div>
+            <div>
+                <CommentItem v-for="comment in commentTree" :key="comment.id" :comment="comment" :level="0" :post-id="postId" @refresh-comments="fetchComments" />
+            </div>
+        </div> -->
 
         <div v-if="comments.length" class="w-full mt-4">
             <div class="flex gap-2 mb-4">
