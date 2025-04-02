@@ -44,7 +44,7 @@
                         <div class="flex px-8 py-4 items-center justify-between border-t-2 border-t-[#FF8200] text-[#FF8200]">
                             <div class="flex items-center gap-2">
                                 <Icon name="formkit:date" class="w-4 h-4" />
-                                <span>{{ post.publication_date }}</span>
+                                <span>{{ post.formattedPublicationDate }}</span>
                             </div>
                             <span>{{ post.category_name }}</span>
                         </div>
@@ -135,6 +135,21 @@ export default {
             .get(`${runtimeConfig.public.apiBase}/post`)
             .then((response) => {
                 this.posts = response.data.data;
+                this.posts = response.data.data.map((post) => ({
+                    ...post,
+                    formattedPublicationDate:
+                        new Date(post.publication_date).toLocaleDateString("pt-BR", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                        }) +
+                        " às " +
+                        new Date(post.publication_date).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                        }),
+                }));
             })
             .catch((error) => {
                 console.error("Error fetching posts", error);

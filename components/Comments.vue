@@ -8,8 +8,8 @@ import "vue-toastification/dist/index.css";
 
 const toast = useToast();
 
-const commentSchema = yup.object({
-    comment: yup.string().required("O comentário é obrigatório").max(200, "Máximo de 200 caracteres").trim(),
+const commentSchema = yup.object().shape({
+    comment: yup.string().trim().strict(true).min(10, "Insira algo").max(200, "Máximo de 200 caracteres"),
 });
 
 const {defineField, handleSubmit, errors, resetForm} = useForm({
@@ -43,6 +43,11 @@ const sortedComments = computed(() => {
 
 const onSubmit = handleSubmit(async (values) => {
     if (!isAuthenticated.value) return;
+
+    if (!values.comment || values.comment.trim().length === 0) {
+        toast.error("O comentário não pode estar vazio");
+        return;
+    }
 
     const token = sessionStorage.getItem("token");
     const user_id = sessionStorage.getItem("userId");
@@ -88,7 +93,7 @@ const adjustRows = () => {
 };
 
 const checkSubmitButtonVisibility = () => {
-    showSubmitButton.value = !!commentValidation.value?.trim();
+    showSubmitButton.value = !!commentValidation.value?.trim().length > 0;
 };
 
 const sortComments = (order) => {
@@ -202,7 +207,10 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div v-else class="text-gray-500">Ainda não há comentários. Seja o primeiro a comentar!</div>
+
+        <div v-else class="flex justify-center self-center items-center text-black text-center text-md font-bold bg-[#FF8200] px-8 py-4 h-fit rounded-md my-8">
+            Ainda não há comentários. Seja o primeiro a comentar!
+        </div>
 
         <NuxtLink v-if="!isAuthenticated" :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
     </div>
