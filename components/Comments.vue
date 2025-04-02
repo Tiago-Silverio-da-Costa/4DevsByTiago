@@ -1,8 +1,152 @@
+<script setup>
+import axios from "axios";
+import {ref} from "vue";
+import {useForm} from "vee-validate";
+import * as yup from "yup";
+import {useToast} from "vue-toastification";
+import "vue-toastification/dist/index.css";
+
+const toast = useToast();
+
+const commentSchema = yup.object({
+    comment: yup.string().required("O comentário é obrigatório").max(200, "Máximo de 200 caracteres").trim(),
+});
+
+const {defineField, handleSubmit, errors, resetForm} = useForm({
+    validationSchema: commentSchema,
+});
+
+const [commentValidation, commentValidationAttrs] = defineField("comment");
+
+const props = defineProps({
+    postId: {
+        type: Number,
+        required: true,
+    },
+});
+
+const comments = ref([]);
+const loading = ref(true);
+const addingComment = ref(false);
+const isAuthenticated = ref(false);
+const textareaRows = ref(1);
+const showSubmitButton = ref(false);
+const sortOrder = ref("recent");
+
+const sortedComments = computed(() => {
+    return [...comments.value].sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return sortOrder.value === "recent" ? dateB - dateA : dateA - dateB;
+    });
+});
+
+const onSubmit = handleSubmit(async (values) => {
+    if (!isAuthenticated.value) return;
+
+    const token = sessionStorage.getItem("token");
+    const user_id = sessionStorage.getItem("userId");
+    const runtimeConfig = useRuntimeConfig();
+
+    addingComment.value = true;
+
+    try {
+        await axios.post(
+            `${runtimeConfig.public.apiBase}/comments`,
+            {
+                comment: {
+                    post_id: props.postId,
+                    content: values.comment,
+                    user_id: Number(user_id),
+                },
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        resetForm();
+        textareaRows.value = 1;
+        showSubmitButton.value = false;
+        await fetchComments();
+        toast.success("Comentário adicionado com sucesso!");
+    } catch (error) {
+        toast.error("Erro ao adicionar comentário");
+    } finally {
+        addingComment.value = false;
+    }
+});
+
+const adjustRows = () => {
+    const charPerRow = 78;
+    const minRows = 1;
+    const maxRows = 5;
+    const charCount = commentValidation.value?.length || 0;
+    textareaRows.value = Math.max(minRows, Math.min(maxRows, Math.ceil(charCount / charPerRow)));
+};
+
+const checkSubmitButtonVisibility = () => {
+    showSubmitButton.value = !!commentValidation.value?.trim();
+};
+
+const sortComments = (order) => {
+    sortOrder.value = order;
+};
+
+const fetchComments = async () => {
+    try {
+        const runtimeConfig = useRuntimeConfig();
+        const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${props.postId}`);
+        comments.value = response.data.data.comments;
+    } catch (error) {
+        toast.error("Erro ao carregar comentários");
+    } finally {
+        loading.value = false;
+    }
+};
+
+const checkAuthentication = () => {
+    const token = sessionStorage.getItem("token");
+    isAuthenticated.value = !!token;
+};
+
+const timeAgo = (createdAt) => {
+    const now = new Date();
+    const past = new Date(createdAt);
+    const diffMs = now - past;
+
+    const diffSeconds = Math.floor(diffMs / 1000);
+    if (diffSeconds < 60) return "agora mesmo";
+
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
+
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
+
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
+
+    const diffYears = Math.floor(diffDays / 365);
+    return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
+};
+
+onMounted(() => {
+    checkAuthentication();
+    fetchComments();
+});
+</script>
+
 <template>
     <div class="flex flex-col items-start w-full justify-center mt-8">
         <h2 class="text-2xl font-bold mb-4">{{ comments.length }} Comentários</h2>
 
-        <form v-if="isAuthenticated" @submit.prevent="addComment" class="w-full mt-4">
+        <form v-if="isAuthenticated" @submit.prevent="onSubmit" class="w-full mt-4">
             <div class="flex items-center px-3 py-2 rounded-lg bg-[#1e2022]">
                 <!-- <button
                     type="button"
@@ -20,7 +164,8 @@
                     <span class="sr-only">Add emoji</span>
                 </button> -->
                 <textarea
-                    v-model="newComment"
+                    v-model="commentValidation"
+                    v-bind="commentValidationAttrs"
                     :rows="textareaRows"
                     @input="adjustRows"
                     @focus="showSubmitButton = true"
@@ -29,7 +174,6 @@
                     placeholder="Adicionar um comentário..."
                 ></textarea>
                 <button
-                    v-if="showSubmitButton"
                     type="submit"
                     class="inline-flex justify-center p-2 text-blue-[#FF8200] rounded-full cursor-pointer hover:bg-blue-100 dark:text-[#FF8200] dark:hover:bg-gray-600"
                     :disabled="addingComment"
@@ -40,6 +184,7 @@
                     <span class="sr-only">Send message</span>
                 </button>
             </div>
+            <p v-if="errors.comment" class="text-red-500 text-sm mt-1">{{ errors.comment }}</p>
         </form>
 
         <div v-if="comments.length" class="w-full mt-4">
@@ -53,7 +198,7 @@
                         <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
                         <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
                     </div>
-                    <p class="mt-2">{{ comment.content }}</p>
+                    <p class="mt-2 break-words">{{ comment.content }}</p>
                 </div>
             </div>
         </div>
@@ -62,134 +207,3 @@
         <NuxtLink v-if="!isAuthenticated" :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
     </div>
 </template>
-
-<script>
-import axios from "axios";
-
-export default {
-    props: {
-        postId: {
-            type: Number,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            comments: [],
-            newComment: "",
-            loading: true,
-            addingComment: false,
-            isAuthenticated: false,
-            textareaRows: 1,
-            showSubmitButton: false,
-            sortOrder: "recent",
-        };
-    },
-    computed: {
-        sortedComments() {
-            return [...this.comments].sort((a, b) => {
-                const dateA = new Date(a.created_at);
-                const dateB = new Date(b.created_at);
-                console.log("dateB", dateB);
-                return this.sortOrder === "recent" ? dateB - dateA : dateA - dateB;
-            });
-        },
-    },
-    created() {
-        this.checkAuthentication();
-        this.fetchComments();
-    },
-    methods: {
-        adjustRows() {
-            const charPerRow = 114;
-            const minRows = 1;
-            const maxRows = 5;
-            const charCount = this.newComment.length;
-            const calculatedRows = Math.max(minRows, Math.min(maxRows, Math.ceil(charCount / charPerRow)));
-            this.textareaRows = calculatedRows;
-        },
-        checkSubmitButtonVisibility() {
-            this.showSubmitButton = false;
-            if (this.newComment.trim()) {
-                this.showSubmitButton = false;
-            }
-        },
-        sortComments(order) {
-            this.sortOrder = order;
-        },
-        async fetchComments() {
-            try {
-                const runtimeConfig = useRuntimeConfig();
-                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${this.postId}`);
-                this.comments = response.data.data.comments.reverse();
-            } catch (error) {
-                // console.log("Erro ao carregar comentários:", error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        async addComment() {
-            if (!this.newComment.trim()) return;
-
-            const token = sessionStorage.getItem("token");
-            const user_id = sessionStorage.getItem("userId");
-
-            this.addingComment = true;
-            const runtimeConfig = useRuntimeConfig();
-
-            try {
-                await axios.post(
-                    `${runtimeConfig.public.apiBase}/comments`,
-                    {
-                        comment: {
-                            post_id: this.postId,
-                            content: this.newComment,
-                            user_id: Number(user_id),
-                        },
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-                this.newComment = "";
-                this.textareaRows = 1;
-                this.showSubmitButton = false;
-                this.fetchComments();
-            } catch (error) {
-                // console.error("Erro ao adicionar comentário:", error);
-            } finally {
-                this.addingComment = false;
-            }
-        },
-        checkAuthentication() {
-            const token = sessionStorage.getItem("token");
-            this.isAuthenticated = !!token;
-        },
-        timeAgo(createdAt) {
-            const now = new Date();
-            const past = new Date(createdAt);
-            const diffMs = now - past;
-
-            const diffSeconds = Math.floor(diffMs / 1000);
-            if (diffSeconds < 60) return "agora mesmo";
-
-            const diffMinutes = Math.floor(diffSeconds / 60);
-            if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
-
-            const diffHours = Math.floor(diffMinutes / 60);
-            if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
-
-            const diffDays = Math.floor(diffHours / 24);
-            if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
-
-            const diffMonths = Math.floor(diffDays / 30);
-            if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
-
-            const diffYears = Math.floor(diffDays / 365);
-            return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
-        },
-    },
-};
-</script>
