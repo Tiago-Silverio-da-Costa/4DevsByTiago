@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import {ref, defineEmits} from "vue";
 import axios from "axios";
 import {useToast} from "vue-toastification";
 import "vue-toastification/dist/index.css";
@@ -9,9 +9,9 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-    level: {
-        type: Number,
-        default: 0,
+    isResponse: {
+        type: Boolean,
+        default: false,
     },
     postId: {
         type: Number,
@@ -19,6 +19,7 @@ const props = defineProps({
     },
 });
 
+const emit = defineEmits(["refresh-comments"]);
 const showReplyForm = ref(false);
 const replyContent = ref("");
 const addingReply = ref(false);
@@ -49,7 +50,6 @@ const submitReply = async () => {
         return;
     }
 
-    const emit = defineEmits(["refresh-comments"]);
     const token = sessionStorage.getItem("token");
     const user_id = sessionStorage.getItem("userId");
     const runtimeConfig = useRuntimeConfig();
@@ -86,7 +86,7 @@ const submitReply = async () => {
 </script>
 
 <template>
-    <div :style="{marginLeft: `${level * 20}px`}" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022] mt-2">
+    <div :class="{'ml-5': isResponse}" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022] mt-2">
         <div class="flex items-center gap-2">
             <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
             <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
@@ -96,13 +96,13 @@ const submitReply = async () => {
         <div v-if="showReplyForm" class="mt-2">
             <textarea
                 v-model="replyContent"
-                class="w-full p-2 border rounded bg-[#27292b] text-white border-[#1e2022] focus:ring-[#FF8200]"
+                class="overflow-hidden resize-none block mr-2 p-2.5 w-full text-sm rounded-lg border outline-none text-gray-900 bg-[#27292b] border-[#1e2022] focus:ring-[#FF8200] focus:border-[#FF8200] dark:border-gray-600 dark:placeholder-white dark:text-white"
                 placeholder="Escreva sua resposta..."
             ></textarea>
             <button @click.prevent="submitReply" class="mt-2 bg-[#FF8200] text-white px-4 py-2 rounded" :disabled="addingReply">Enviar Resposta</button>
         </div>
-        <div v-if="comment.replies && comment.replies.length > 0" class="mt-2">
-            <CommentItem v-for="reply in comment.replies" :key="reply.id" :comment="reply" :level="level + 1" :post-id="postId" @refresh-comments="$emit('refresh-comments')" />
-        </div>
+    </div>
+    <div v-if="comment.replies && comment.replies.length > 0" class="mt-2">
+        <CommentItem v-for="reply in comment.replies" :key="reply.id" :comment="reply" :is-response="true" :post-id="postId" @refresh-comments="$emit('refresh-comments')" />
     </div>
 </template>

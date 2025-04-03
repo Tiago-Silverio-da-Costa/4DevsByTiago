@@ -35,8 +35,6 @@ const showSubmitButton = ref(false);
 const sortOrder = ref("recent");
 
 const buildCommentTree = (comments, parentId = null) => {
-    console.log("comments", comments);
-    console.log("parentId", parentId);
     return comments
         .filter((comment) => comment.parent_id === parentId)
         .map((comment) => ({
@@ -139,30 +137,6 @@ const checkAuthentication = () => {
     isAuthenticated.value = !!token;
 };
 
-const timeAgo = (createdAt) => {
-    const now = new Date();
-    const past = new Date(createdAt);
-    const diffMs = now - past;
-
-    const diffSeconds = Math.floor(diffMs / 1000);
-    if (diffSeconds < 60) return "agora mesmo";
-
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
-
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
-
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
-
-    const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
-
-    const diffYears = Math.floor(diffDays / 365);
-    return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
-};
-
 onMounted(() => {
     checkAuthentication();
     fetchComments();
@@ -172,6 +146,13 @@ onMounted(() => {
 <template>
     <div class="flex flex-col items-start w-full justify-center mt-8">
         <h2 class="text-2xl font-bold mb-4">{{ comments.length }} Comentários</h2>
+        <div v-if="!isAuthenticated" class="flex items-center self-center gap-4 bg-[#FF8200] rounded-md px-8 py-4 my-4">
+            <Icon name="material-symbols:link-rounded" class="bg-black w-6 h-6" />
+            <NuxtLink :to="`/home/login`" class="flex justify-center self-center items-center text-black text-center text-md font-bold h-fit">
+                Faça login para adicionar um comentário
+            </NuxtLink>
+            <Icon name="material-symbols:link-rounded" class="bg-black w-6 h-6" />
+        </div>
 
         <form v-if="isAuthenticated" @submit.prevent="onSubmit" class="w-full mt-4">
             <div class="flex items-center px-3 py-2 rounded-lg bg-[#1e2022]">
@@ -203,13 +184,10 @@ onMounted(() => {
                 ></textarea>
                 <button
                     type="submit"
-                    class="inline-flex justify-center p-2 text-blue-[#FF8200] rounded-full cursor-pointer hover:bg-blue-100 dark:text-[#FF8200] dark:hover:bg-gray-600"
+                    class="flex items-center justify-center p-2 text-blue-[#FF8200] rounded-full cursor-pointer hover:bg-blue-100 dark:text-[#FF8200] transition-all dark:hover:bg-gray-600"
                     :disabled="addingComment"
                 >
-                    <svg class="w-5 h-5 rotate-90 rtl:-rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                    </svg>
-                    <span class="sr-only">Send message</span>
+                    <Icon name="ic:round-send" class="bg-[#FF8200] w-6 h-6" />
                 </button>
             </div>
             <p v-if="errors.comment" class="text-red-500 text-sm mt-1">{{ errors.comment }}</p>
@@ -221,14 +199,12 @@ onMounted(() => {
                 <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
             </div>
             <div>
-                <CommentItem v-for="comment in commentTree" :key="comment.id" :comment="comment" :level="0" :post-id="postId" @refresh-comments="fetchComments" />
+                <CommentItem v-for="comment in commentTree" :key="comment.id" :comment="comment" :is-response="false" :post-id="postId" @refresh-comments="fetchComments" />
             </div>
         </div>
 
         <div v-else class="flex justify-center self-center items-center text-black text-center text-md font-bold bg-[#FF8200] px-8 py-4 h-fit rounded-md my-8">
             Ainda não há comentários. Seja o primeiro a comentar!
         </div>
-
-        <NuxtLink v-if="!isAuthenticated" :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
     </div>
 </template>
