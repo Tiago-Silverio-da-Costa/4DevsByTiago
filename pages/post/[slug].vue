@@ -15,7 +15,7 @@
             </ul>
             <div class="mt-4" v-html="processedContent"></div>
             <div class="mt-4 text-[#FF8200]">
-                <span>{{ post.publication_date }}</span> | <span>{{ post.category_name }}</span>
+                <span>{{ formattedPublicationDate }}</span> | <span>{{ post.category_name }}</span>
             </div>
 
             <Comments :postId="post.id" />
@@ -50,13 +50,16 @@ export default {
             .then((response) => {
                 const post = response.data.data;
                 this.post = post;
-                const publicationDate = new Date(response.publication_date);
-                this.formattedPublicationDate = publicationDate.toLocaleDateString("Pt-BR", {
-                    timeZone: "America/Sao_Paulo",
+                const publicationDate = new Date(response.data.data.publication_date);
+                this.formattedPublicationDate = `${publicationDate.toLocaleDateString("pt-BR", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
-                });
+                })} às ${publicationDate.toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                })}`;
 
                 this.parseContent(post.content);
             })

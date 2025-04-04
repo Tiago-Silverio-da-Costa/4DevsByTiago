@@ -1,119 +1,210 @@
+<script setup>
+import axios from "axios";
+import {ref} from "vue";
+import {useForm} from "vee-validate";
+import * as yup from "yup";
+import {useToast} from "vue-toastification";
+import "vue-toastification/dist/index.css";
+import CommentItem from "./CommentItem.vue";
+
+const toast = useToast();
+
+const commentSchema = yup.object().shape({
+    comment: yup.string().trim().max(200, "Máximo de 200 caracteres"),
+});
+
+const {defineField, handleSubmit, errors, resetForm} = useForm({
+    validationSchema: commentSchema,
+});
+
+const [commentValidation, commentValidationAttrs] = defineField("comment");
+
+const props = defineProps({
+    postId: {
+        type: Number,
+        required: true,
+    },
+});
+
+const comments = ref([]);
+const loading = ref(true);
+const addingComment = ref(false);
+const isAuthenticated = ref(false);
+const textareaRows = ref(1);
+const showSubmitButton = ref(false);
+const sortOrder = ref("recent");
+
+const buildCommentTree = (comments, parentId = null) => {
+    return comments
+        .filter((comment) => comment.parent_id === parentId)
+        .map((comment) => ({
+            ...comment,
+            replies: buildCommentTree(comments, comment.id),
+        }));
+};
+
+const commentTree = computed(() => {
+    const sorted = [...comments.value].sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return sortOrder.value === "recent" ? dateB - dateA : dateA - dateB;
+    });
+    return buildCommentTree(sorted);
+});
+
+const sortedComments = computed(() => {
+    return [...comments.value].sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return sortOrder.value === "recent" ? dateB - dateA : dateA - dateB;
+    });
+});
+
+const onSubmit = handleSubmit(async (values) => {
+    if (!isAuthenticated.value) return;
+
+    if (!values.comment || values.comment.trim().length === 0) {
+        toast.error("O comentário não pode estar vazio");
+        return;
+    }
+
+    const token = sessionStorage.getItem("token");
+    const user_id = sessionStorage.getItem("userId");
+    const runtimeConfig = useRuntimeConfig();
+
+    addingComment.value = true;
+
+    try {
+        await axios.post(
+            `${runtimeConfig.public.apiBase}/comments`,
+            {
+                comment: {
+                    post_id: props.postId,
+                    content: values.comment,
+                    user_id: Number(user_id),
+                    parent_id: null,
+                },
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        resetForm();
+        textareaRows.value = 1;
+        showSubmitButton.value = false;
+        await fetchComments();
+        toast.success("Comentário adicionado com sucesso!");
+    } catch (error) {
+        toast.error("Erro ao adicionar comentário");
+    } finally {
+        addingComment.value = false;
+    }
+});
+
+const adjustRows = () => {
+    const charPerRow = 78;
+    const minRows = 1;
+    const maxRows = 5;
+    const charCount = commentValidation.value?.length || 0;
+    textareaRows.value = Math.max(minRows, Math.min(maxRows, Math.ceil(charCount / charPerRow)));
+};
+
+const checkSubmitButtonVisibility = () => {
+    showSubmitButton.value = !!commentValidation.value?.trim().length > 0;
+};
+
+const sortComments = (order) => {
+    sortOrder.value = order;
+};
+
+const fetchComments = async () => {
+    try {
+        const runtimeConfig = useRuntimeConfig();
+        const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${props.postId}`);
+        comments.value = response.data.data.comments;
+    } catch (error) {
+        toast.error("Erro ao carregar comentários");
+    } finally {
+        loading.value = false;
+    }
+};
+
+const checkAuthentication = () => {
+    const token = sessionStorage.getItem("token");
+    isAuthenticated.value = !!token;
+};
+
+onMounted(() => {
+    checkAuthentication();
+    fetchComments();
+});
+</script>
+
 <template>
     <div class="flex flex-col items-start w-full justify-center mt-8">
         <h2 class="text-2xl font-bold mb-4">{{ comments.length }} Comentários</h2>
-        <form v-if="isAuthenticated" @submit.prevent="addComment" class="w-full mt-4">
-            <textarea v-model="newComment" rows="1" placeholder="Adicionar um comentário..." class="w-full p-2 border border-[#3c4143] bg-[#1e2022] outline-none rounded-md">
-            </textarea>
-            <button type="submit" class="mt-2 px-4 py-2 bg-[#FF8200] text-white rounded-md" :disabled="addingComment">
-                {{ addingComment ? "Enviando..." : "Comentar" }}
-            </button>
+        <div v-if="!isAuthenticated" class="flex items-center self-center gap-4 bg-[#FF8200] rounded-md px-8 py-4 my-4">
+            <Icon name="material-symbols:link-rounded" class="bg-black w-6 h-6" />
+            <NuxtLink :to="`/home/login`" class="flex justify-center self-center items-center text-black text-center text-md font-bold h-fit">
+                Faça login para adicionar um comentário
+            </NuxtLink>
+            <Icon name="material-symbols:link-rounded" class="bg-black w-6 h-6" />
+        </div>
+
+        <form v-if="isAuthenticated" @submit.prevent="onSubmit" class="w-full mt-4">
+            <div class="flex items-center px-3 py-2 rounded-lg bg-[#1e2022]">
+                <!-- <button
+                    type="button"
+                    class="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+                >
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM4.6 11a5.5 5.5 0 0 0 10.81 0H4.6Z"
+                        />
+                    </svg>
+                    <span class="sr-only">Add emoji</span>
+                </button> -->
+                <textarea
+                    id="comments"
+                    v-model="commentValidation"
+                    v-bind="commentValidationAttrs"
+                    :rows="textareaRows"
+                    @input="adjustRows"
+                    @focus="showSubmitButton = true"
+                    @blur="checkSubmitButtonVisibility"
+                    class="overflow-hidden resize-none block mr-2 p-2.5 w-full text-sm rounded-lg border outline-none text-gray-900 bg-[#27292b] border-[#1e2022] focus:ring-[#FF8200] focus:border-[#FF8200] dark:border-gray-600 dark:placeholder-white dark:text-white"
+                    placeholder="Adicionar um comentário..."
+                ></textarea>
+                <button
+                    type="submit"
+                    class="flex items-center justify-center p-2 text-blue-[#FF8200] rounded-full cursor-pointer hover:bg-blue-100 dark:text-[#FF8200] transition-all dark:hover:bg-gray-600"
+                    :disabled="addingComment"
+                >
+                    <Icon name="ic:round-send" class="bg-[#FF8200] w-6 h-6" />
+                </button>
+            </div>
+            <p v-if="errors.comment" class="text-red-500 text-sm mt-1">{{ errors.comment }}</p>
         </form>
+
         <div v-if="comments.length" class="w-full mt-4">
-            <div v-for="comment in comments" :key="comment.id" class="p-4 border border-[#3c4143] rounded-md bg-[#1e2022]">
-                <div class="flex items-center gap-2">
-                    <p class="font-semibold">@{{ comment.user_name.replace(/\s/g, "_") }}</p>
-                    <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
-                </div>
-                <p class="mt-2">{{ comment.content }}</p>
+            <div class="flex gap-2 mb-4">
+                <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais recentes</button>
+                <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
+            </div>
+            <div>
+                <CommentItem v-for="comment in commentTree" :key="comment.id" :comment="comment" :is-response="false" :post-id="postId" @refresh-comments="fetchComments" />
             </div>
         </div>
-        <div v-else class="text-gray-500">Ainda não há comentários. Seja o primeiro a comentar!</div>
 
-        <NuxtLink v-else :to="`/login`" class="text-gray-500 mt-2"> Faça login para adicionar um comentário </NuxtLink>
+        <div v-else class="flex justify-center self-center items-center text-black text-center text-md font-bold bg-[#FF8200] px-8 py-4 h-fit rounded-md my-8">
+            Ainda não há comentários. Seja o primeiro a comentar!
+        </div>
     </div>
 </template>
-
-<script>
-import axios from "axios";
-import moment from "moment-timezone";
-
-export default {
-    props: {
-        postId: {
-            type: Number,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            comments: [],
-            newComment: "",
-            loading: true,
-            addingComment: false,
-            isAuthenticated: false,
-        };
-    },
-    created() {
-        this.checkAuthentication();
-        this.fetchComments();
-    },
-    methods: {
-        async fetchComments() {
-            try {
-                const runtimeConfig = useRuntimeConfig();
-
-                const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${this.postId}`);
-                this.comments = response.data.data.comments;
-            } catch (error) {
-                // console.log("Erro ao carregar comentários:", error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        async addComment() {
-            if (!this.newComment.trim()) return;
-
-            const token = sessionStorage.getItem("token");
-            const user_id = sessionStorage.getItem("userId");
-
-            this.addingComment = true;
-            const runtimeConfig = useRuntimeConfig();
-
-            try {
-                await axios.post(
-                    `${runtimeConfig.public.apiBase}/comments`,
-                    {
-                        comment: {
-                            post_id: this.postId,
-                            content: this.newComment,
-                            user_id: Number(user_id),
-                        },
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-                this.newComment = "";
-                this.fetchComments();
-            } catch (error) {
-                // console.error("Erro ao adicionar comentário:", error);
-            } finally {
-                this.addingComment = false;
-            }
-        },
-        checkAuthentication() {
-            const token = sessionStorage.getItem("token");
-            this.isAuthenticated = !!token;
-        },
-        timeAgo(createdAt) {
-            const now = moment().tz("America/Sao_Paulo");
-            const past = moment(createdAt).tz("America/Sao_Paulo");
-            const diffSeconds = now.diff(past, "seconds");
-
-            if (diffSeconds < 60) return "agora mesmo";
-            const diffMinutes = now.diff(past, "minutes");
-            if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
-            const diffHours = now.diff(past, "hours");
-            if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
-            const diffDays = now.diff(past, "days");
-            if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
-            const diffMonths = now.diff(past, "months");
-            if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
-            const diffYears = now.diff(past, "years");
-            return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
-        },
-    },
-};
-</script>
