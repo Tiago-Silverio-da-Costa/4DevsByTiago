@@ -1,11 +1,13 @@
 <script>
 import Search from "~/components/Search.vue";
+import CreatePostModal from "~/components/CreatePostModal.vue";
 import axios from "axios";
 import {useAuthStore} from "~/stores/useAuth";
 
 export default {
     components: {
         Search,
+        CreatePostModal,
     },
     setup() {
         const authStore = useAuthStore();
@@ -13,6 +15,7 @@ export default {
     },
     data() {
         return {
+            isModalOpen: false,
             posts: [],
             searchQuery: "",
             currentPage: 1,
@@ -69,6 +72,45 @@ export default {
                 this.currentPage++;
             }
         },
+        openCreateModal() {
+            this.isModalOpen = true;
+            this.$refs.createPostModal.openModal();
+        },
+        refreshPosts() {
+            this.fetchPosts();
+        },
+        fetchPosts() {
+            const runtimeConfig = useRuntimeConfig();
+
+            axios
+                .get(`${runtimeConfig.public.apiBase}/post`)
+                .then((response) => {
+                    this.posts = response.data.data;
+                    this.posts = response.data.data.map((post) => ({
+                        ...post,
+                        formattedPublicationDate:
+                            new Date(post.publication_date).toLocaleDateString("pt-BR", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                            }) +
+                            " às " +
+                            new Date(post.publication_date).toLocaleTimeString("pt-BR", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                            }),
+                    }));
+                })
+                .catch((error) => {
+                    console.error("Error fetching posts", error);
+                });
+        },
+    },
+    watch: {
+        isModalOpen(newVal) {
+            document.body.style.overflow = newVal ? "hidden" : "auto";
+        },
     },
     mounted() {
         const runtimeConfig = useRuntimeConfig();
@@ -117,8 +159,11 @@ export default {
                         {{ category }}
                     </option>
                 </select>
-                <!-- @click="openCreateModal" -->
-                <button v-if="isAdmin" class="flex items-center justify-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold">
+                <button
+                    v-if="isAdmin"
+                    @click="openCreateModal"
+                    class="flex items-center justify-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold"
+                >
                     <Icon name="material-symbols:post-add" class="bg-black w-5 h-5" />
                     <span class="text-black">novo post</span>
                 </button>
@@ -179,6 +224,7 @@ export default {
             </div>
         </div>
     </div>
+    <CreatePostModal :isOpen="isModalOpen" ref="createPostModal" @post-created="refreshPosts" @close="isModalOpen = false" />
 </template>
 
 <style scoped>
