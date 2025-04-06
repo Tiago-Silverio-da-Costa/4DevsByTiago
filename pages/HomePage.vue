@@ -4,12 +4,14 @@ import CreatePostModal from "~/components/CreatePostModal.vue";
 import axios from "axios";
 import {useAuthStore} from "~/stores/useAuth";
 import EditPostModal from "~/components/EditPostModal.vue";
+import DeletePostModal from "~/components/DeletePostModal.vue";
 
 export default {
     components: {
         Search,
         CreatePostModal,
         EditPostModal,
+        DeletePostModal,
     },
     setup() {
         const authStore = useAuthStore();
@@ -19,6 +21,8 @@ export default {
         return {
             isCreateModalOpen: false,
             isEditModalOpen: false,
+            isDeleteModalOpen: false,
+            postToDelete: null,
             postToEdit: null,
             posts: [],
             searchQuery: "",
@@ -83,6 +87,28 @@ export default {
             this.postToEdit = post;
             this.isEditModalOpen = true;
         },
+        openDeleteModal(post) {
+            this.postToDelete = post;
+            this.isDeleteModalOpen = true;
+        },
+        closeDeleteModal() {
+            this.isDeleteModalOpen = false;
+            this.postToDelete = null;
+        },
+        confirmDelete() {
+            if (this.postToDelete) {
+                const runtimeConfig = useRuntimeConfig();
+                axios
+                    .patch(`${runtimeConfig.public.apiBase}/post/${this.postToDelete.id}`)
+                    .then(() => {
+                        this.refreshPosts();
+                        this.closeDeleteModal();
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao excluir post:", error);
+                    });
+            }
+        },
         refreshPosts() {
             this.fetchPosts();
         },
@@ -119,6 +145,9 @@ export default {
             document.body.style.overflow = newVal ? "hidden" : "auto";
         },
         isEditModalOpen(newVal) {
+            document.body.style.overflow = newVal ? "hidden" : "auto";
+        },
+        isDeleteModalOpen(newVal) {
             document.body.style.overflow = newVal ? "hidden" : "auto";
         },
     },
@@ -202,7 +231,10 @@ export default {
                                 >
                                     <Icon name="material-symbols:edit-outline-rounded" class="bg-black w-6 h-6" />
                                 </button>
-                                <button class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold">
+                                <button
+                                    @click="openDeleteModal(post)"
+                                    class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold"
+                                >
                                     <Icon name="material-symbols:delete-outline-rounded" class="bg-black w-6 h-6" />
                                 </button>
                             </div>
@@ -237,6 +269,7 @@ export default {
             </div>
         </div>
     </div>
+    <DeletePostModal :isOpen="isDeleteModalOpen" :postToDelete="postToDelete" @close="closeDeleteModal" @confirmDelete="confirmDelete" />
     <CreatePostModal :isOpen="isCreateModalOpen" @post-created="refreshPosts" @close="isCreateModalOpen = false" />
     <EditPostModal :isOpen="isEditModalOpen" :postToEdit="postToEdit" @post-created="refreshPosts" @close="isEditModalOpen = false" />
 </template>
