@@ -3,11 +3,13 @@ import Search from "~/components/Search.vue";
 import CreatePostModal from "~/components/CreatePostModal.vue";
 import axios from "axios";
 import {useAuthStore} from "~/stores/useAuth";
+import EditPostModal from "~/components/EditPostModal.vue";
 
 export default {
     components: {
         Search,
         CreatePostModal,
+        EditPostModal,
     },
     setup() {
         const authStore = useAuthStore();
@@ -15,7 +17,9 @@ export default {
     },
     data() {
         return {
-            isModalOpen: false,
+            isCreateModalOpen: false,
+            isEditModalOpen: false,
+            postToEdit: null,
             posts: [],
             searchQuery: "",
             currentPage: 1,
@@ -73,8 +77,11 @@ export default {
             }
         },
         openCreateModal() {
-            this.isModalOpen = true;
-            this.$refs.createPostModal.openModal();
+            this.isCreateModalOpen = true;
+        },
+        openEditModal(post) {
+            this.postToEdit = post;
+            this.isEditModalOpen = true;
         },
         refreshPosts() {
             this.fetchPosts();
@@ -108,7 +115,10 @@ export default {
         },
     },
     watch: {
-        isModalOpen(newVal) {
+        isCreateModalOpen(newVal) {
+            document.body.style.overflow = newVal ? "hidden" : "auto";
+        },
+        isEditModalOpen(newVal) {
             document.body.style.overflow = newVal ? "hidden" : "auto";
         },
     },
@@ -186,7 +196,10 @@ export default {
                         <div class="relative bg-[#181C14] border-b-2 border-b-[#FF8200]">
                             <NuxtImg :src="post.post_image_url" alt="image" width="400" height="200" />
                             <div v-if="isAdmin" class="flex items-center gap-4 absolute top-4 right-4">
-                                <button class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold">
+                                <button
+                                    @click="openEditModal(post)"
+                                    class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold"
+                                >
                                     <Icon name="material-symbols:edit-outline-rounded" class="bg-black w-6 h-6" />
                                 </button>
                                 <button class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold">
@@ -224,7 +237,8 @@ export default {
             </div>
         </div>
     </div>
-    <CreatePostModal :isOpen="isModalOpen" ref="createPostModal" @post-created="refreshPosts" @close="isModalOpen = false" />
+    <CreatePostModal :isOpen="isCreateModalOpen" @post-created="refreshPosts" @close="isCreateModalOpen = false" />
+    <EditPostModal :isOpen="isEditModalOpen" :postToEdit="postToEdit" @post-created="refreshPosts" @close="isEditModalOpen = false" />
 </template>
 
 <style scoped>
