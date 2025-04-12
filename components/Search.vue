@@ -28,7 +28,6 @@ export default {
     methods: {
         emitSearch() {
             this.$emit("search", this.localQuery);
-            console.log("localQuery", this.localQuery);
         },
     },
 };

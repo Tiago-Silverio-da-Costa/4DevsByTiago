@@ -5,6 +5,8 @@ import axios from "axios";
 import {useAuthStore} from "~/stores/useAuth";
 import EditPostModal from "~/components/EditPostModal.vue";
 import DeletePostModal from "~/components/DeletePostModal.vue";
+import {useToast} from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 export default {
     components: {
@@ -98,15 +100,28 @@ export default {
         },
         confirmDelete() {
             if (this.postToDelete) {
+                const toast = useToast();
                 const runtimeConfig = useRuntimeConfig();
+                const sendData = {
+                    post: {
+                        id: this.postToDelete.id,
+                    },
+                };
+                const token = sessionStorage.getItem("token");
+
                 axios
-                    .patch(`${runtimeConfig.public.apiBase}/post/${this.postToDelete.id}`)
+                    .put(`${runtimeConfig.public.apiBase}/post/remove`, sendData, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
                     .then(() => {
+                        toast.success("Post removido com sucesso!");
                         this.refreshPosts();
                         this.closeDeleteModal();
                     })
                     .catch((error) => {
-                        console.error("Erro ao excluir post:", error);
+                        toast.error("Erro ao remover post");
                     });
             }
         },
@@ -115,29 +130,30 @@ export default {
         },
         fetchPosts() {
             const runtimeConfig = useRuntimeConfig();
-
+            const toast = useToast();
             axios
                 .get(`${runtimeConfig.public.apiBase}/post`)
                 .then((response) => {
-                    this.posts = response.data.data;
-                    this.posts = response.data.data.map((post) => ({
-                        ...post,
-                        formattedPublicationDate:
-                            new Date(post.publication_date).toLocaleDateString("pt-BR", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                            }) +
-                            " às " +
-                            new Date(post.publication_date).toLocaleTimeString("pt-BR", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                            }),
-                    }));
+                    this.posts = response.data.data
+                        .map((post) => ({
+                            ...post,
+                            formattedPublicationDate:
+                                new Date(post.publication_date).toLocaleDateString("pt-BR", {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                }) +
+                                " às " +
+                                new Date(post.publication_date).toLocaleTimeString("pt-BR", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: false,
+                                }),
+                        }))
+                        .filter((post) => post.is_active !== 0);
                 })
                 .catch((error) => {
-                    console.error("Error fetching posts", error);
+                    toast.error("Erro ao buscar posts!");
                 });
         },
     },
@@ -154,29 +170,31 @@ export default {
     },
     mounted() {
         const runtimeConfig = useRuntimeConfig();
-
+        const toast = useToast();
         axios
             .get(`${runtimeConfig.public.apiBase}/post`)
             .then((response) => {
                 this.posts = response.data.data;
-                this.posts = response.data.data.map((post) => ({
-                    ...post,
-                    formattedPublicationDate:
-                        new Date(post.publication_date).toLocaleDateString("pt-BR", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                        }) +
-                        " às " +
-                        new Date(post.publication_date).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                        }),
-                }));
+                this.posts = response.data.data
+                    .map((post) => ({
+                        ...post,
+                        formattedPublicationDate:
+                            new Date(post.publication_date).toLocaleDateString("pt-BR", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                            }) +
+                            " às " +
+                            new Date(post.publication_date).toLocaleTimeString("pt-BR", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                            }),
+                    }))
+                    .filter((post) => post.is_active !== 0);
             })
             .catch((error) => {
-                console.error("Error fetching posts", error);
+                toast.error("Erro ao buscar posts!");
             });
     },
 };
