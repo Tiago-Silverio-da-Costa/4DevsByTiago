@@ -23,7 +23,7 @@ const emit = defineEmits(["close", "post-created"]);
 
 const postSchema = yup.object().shape({
     author_id: yup.string().required("Autor é obrigatório"),
-    category: yup.string().required("Categoria é obrigatória"),
+    category_id: yup.string().required("Categoria é obrigatória"),
     title: yup.string().trim().required("Título é obrigatório"),
     slug: yup.string().trim().required("Slug é obrigatório"),
     description: yup.string().trim().required("Descrição é obrigatória"),
@@ -36,7 +36,7 @@ const {defineField, handleSubmit, errors, resetForm} = useForm({
 });
 
 const [author_id] = defineField("author_id");
-const [category] = defineField("category");
+const [category_id] = defineField("category_id");
 const [title] = defineField("title");
 const [slug] = defineField("slug");
 const [description] = defineField("description");
@@ -49,8 +49,13 @@ const categories = ref([]);
 const fetchAuthors = async () => {
     const runtimeConfig = useRuntimeConfig();
     try {
-        const response = await axios.get(`${runtimeConfig.public.apiBase}/post/author`);
-        authors.value = response.data.results;
+        const token = sessionStorage.getItem("token");
+        const response = await axios.get(`${runtimeConfig.public.apiBase}/post/author`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        authors.value = response.data.data;
     } catch (error) {
         toast.error("Erro ao carregar autores");
     }
@@ -59,8 +64,13 @@ const fetchAuthors = async () => {
 const fetchCategories = async () => {
     const runtimeConfig = useRuntimeConfig();
     try {
-        const response = await axios.get(`${runtimeConfig.public.apiBase}/post/category`);
-        categories.value = response.data.results;
+        const token = sessionStorage.getItem("token");
+        const response = await axios.get(`${runtimeConfig.public.apiBase}/post/category`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        categories.value = response.data.data;
     } catch (error) {
         toast.error("Erro ao carregar categorias");
     }
@@ -69,13 +79,31 @@ const fetchCategories = async () => {
 const onSubmit = handleSubmit(async (values) => {
     const runtimeConfig = useRuntimeConfig();
     try {
-        await axios.post(`${runtimeConfig.public.apiBase}/post`, values);
+        const sendData = {
+            post: {
+                id: props.postToEdit.id,
+                author_id: values.author_id,
+                category_id: values.category_id,
+                content: values.content,
+                description: values.description,
+                post_image_url: values.post_image_url,
+                slug: values.slug,
+                title: values.title,
+            },
+        };
+        const token = sessionStorage.getItem("token");
+
+        await axios.put(`${runtimeConfig.public.apiBase}/post/edit`, sendData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
         emit("post-created");
         emit("close");
         resetForm();
-        toast.success("Post criado com sucesso!");
+        toast.success("Post editado com sucesso!");
     } catch (error) {
-        toast.error("Erro ao criar post");
+        toast.error("Erro ao editar post");
     }
 });
 
@@ -84,7 +112,7 @@ watch(
     (newVal) => {
         if (newVal && props.postToEdit) {
             author_id.value = props.postToEdit.author_id;
-            category.value = props.postToEdit.category;
+            category_id.value = props.postToEdit.category_id;
             title.value = props.postToEdit.title;
             slug.value = props.postToEdit.slug;
             description.value = props.postToEdit.description;
@@ -119,16 +147,16 @@ watch(
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="category" class="mb-1">Categoria</label>
+                    <label for="category_id" class="mb-1">Categoria</label>
                     <div class="flex gap-2">
-                        <select id="category" v-model="category" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
+                        <select id="category_id" v-model="category_id" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
                             <option value="" disabled>Selecione uma categoria</option>
                             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                                 {{ cat.name }}
                             </option>
                         </select>
                     </div>
-                    <p v-if="errors.category" class="text-red-500 text-sm mt-1">{{ errors.category }}</p>
+                    <p v-if="errors.category_id" class="text-red-500 text-sm mt-1">{{ errors.category_id }}</p>
                 </div>
 
                 <div class="flex flex-col">
