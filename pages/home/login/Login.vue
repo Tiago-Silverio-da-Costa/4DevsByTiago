@@ -5,6 +5,7 @@ import {useForm, defineRule, configure} from "vee-validate";
 import * as yup from "yup";
 import {useToast} from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import {useAuthStore} from "~/stores/useAuth";
 
 const loginSchema = yup.object({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -40,13 +41,12 @@ const onSubmit = handleSubmit(async (values) => {
 
         if (response.status === 200 || response.status === 201) {
             toast.success("Acesso bem-sucedido!");
-            console.log("response.data.results", response.data.results.user_id);
             sessionStorage.setItem("token", response.data.results.token);
-            sessionStorage.setItem("userId", response.data.results.user_id);
+            const authStore = useAuthStore();
+            authStore.loadUser();
             navigateTo("/");
         }
     } catch (error) {
-        console.log("error", error);
         const errorMessage = error.response?.data?.message || "Ocorreu um erro ao tentar acessar!";
         toast.error(errorMessage);
     } finally {

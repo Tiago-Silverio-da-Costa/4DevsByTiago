@@ -27,6 +27,8 @@
 <script>
 import axios from "axios";
 import Comments from "@/components/Comments.vue";
+import {useToast} from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 export default {
     components: {
@@ -44,7 +46,7 @@ export default {
     created() {
         const slug = this.$route.params.slug;
         const runtimeConfig = useRuntimeConfig();
-
+        const toast = useToast();
         axios
             .get(`${runtimeConfig.public.apiBase}/post/slug/${slug}`)
             .then((response) => {
@@ -64,10 +66,7 @@ export default {
                 this.parseContent(post.content);
             })
             .catch((error) => {
-                console.error("Error fetching posts", error);
-            })
-            .catch((error) => {
-                console.error("Error fetching posts", error);
+                toast.error("Erro ao buscar post!");
             });
     },
     methods: {
@@ -128,7 +127,7 @@ export default {
                         isInCodeBlock = false;
                         codeBlockContent.push(line.replace(/<\/code>/, ""));
                         newContent.push(
-                            `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-white overflow-auto"><code>${codeBlockContent
+                            `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-[#FF8200] overflow-auto"><code>${codeBlockContent
                                 .join("\n")
                                 .replace(/</g, "&lt;")
                                 .replace(/>/g, "&gt;")}</code></pre>`
