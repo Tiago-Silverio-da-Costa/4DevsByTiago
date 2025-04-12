@@ -15,6 +15,7 @@ export default {
     },
     setup() {
         const authStore = useAuthStore();
+        authStore.loadUser();
         return {authStore};
     },
     data() {
