@@ -141,12 +141,11 @@ const saveNewAuthor = handleAuthorSubmit(async (values) => {
         };
         const token = sessionStorage.getItem("token");
 
-        const response = await axios.post(`${runtimeConfig.public.apiBase}/post/create/author`, sendData, {
+        await axios.post(`${runtimeConfig.public.apiBase}/post/create/author`, sendData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
-        console.log("reasd", response.data);
         await fetchAuthors();
         await fetchCategories();
         isAuthorModalOpen.value = false;
@@ -160,7 +159,18 @@ const saveNewAuthor = handleAuthorSubmit(async (values) => {
 const saveNewCategory = handleCategorySubmit(async (values) => {
     const runtimeConfig = useRuntimeConfig();
     try {
-        await axios.post(`${runtimeConfig.public.apiBase}/post/category`, values);
+        const sendData = {
+            category: {
+                name: values.name,
+            },
+        };
+        const token = sessionStorage.getItem("token");
+        await axios.post(`${runtimeConfig.public.apiBase}/post/create/category`, sendData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        await fetchAuthors();
         await fetchCategories();
         isCategoryModalOpen.value = false;
         newCategoryName.value = "";
