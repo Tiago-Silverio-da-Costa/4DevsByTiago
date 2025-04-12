@@ -18,8 +18,8 @@ const props = defineProps({
 const emit = defineEmits(["close", "post-created"]);
 
 const postSchema = yup.object().shape({
-    author_id: yup.string().required("Autor é obrigatório"),
-    category: yup.string().required("Categoria é obrigatória"),
+    // author_id: yup.string().required("Autor é obrigatório"),
+    // category: yup.string().required("Categoria é obrigatória"),
     title: yup.string().trim().required("Título é obrigatório"),
     slug: yup.string().trim().required("Slug é obrigatório"),
     description: yup.string().trim().required("Descrição é obrigatória"),
@@ -70,32 +70,50 @@ const isCategoryModalOpen = ref(false);
 const authors = ref([]);
 const categories = ref([]);
 
-const fetchAuthors = async () => {
-    const runtimeConfig = useRuntimeConfig();
-    try {
-        const response = await axios.get(`${runtimeConfig.public.apiBase}/post/author`);
-        authors.value = response.data.results;
-    } catch (error) {
-        console.error("Error fetching authors", error);
-        toast.error("Erro ao carregar autores");
-    }
-};
+// const fetchAuthors = async () => {
+//     const runtimeConfig = useRuntimeConfig();
+//     try {
+//         const response = await axios.get(`${runtimeConfig.public.apiBase}/post/author`);
+//         authors.value = response.data.results;
+//     } catch (error) {
+//         console.error("Error fetching authors", error);
+//         toast.error("Erro ao carregar autores");
+//     }
+// };
 
-const fetchCategories = async () => {
-    const runtimeConfig = useRuntimeConfig();
-    try {
-        const response = await axios.get(`${runtimeConfig.public.apiBase}/post/category`);
-        categories.value = response.data.results;
-    } catch (error) {
-        console.error("Error fetching categories", error);
-        toast.error("Erro ao carregar categorias");
-    }
-};
+// const fetchCategories = async () => {
+//     const runtimeConfig = useRuntimeConfig();
+//     try {
+//         const response = await axios.get(`${runtimeConfig.public.apiBase}/post/category`);
+//         categories.value = response.data.results;
+//     } catch (error) {
+//         console.error("Error fetching categories", error);
+//         toast.error("Erro ao carregar categorias");
+//     }
+// };
 
 const onSubmit = handleSubmit(async (values) => {
     const runtimeConfig = useRuntimeConfig();
+
     try {
-        await axios.post(`${runtimeConfig.public.apiBase}/post`, values);
+        const sendData = {
+            post: {
+                author_id: 4,
+                category_id: 6,
+                title: values.title,
+                description: values.description,
+                post_image_url: values.post_image_url,
+                content: values.content,
+                slug: values.slug,
+            },
+        };
+        const token = sessionStorage.getItem("token");
+
+        await axios.post(`${runtimeConfig.public.apiBase}/post/create`, sendData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
         emit("post-created");
         emit("close");
         resetForm();
@@ -106,42 +124,42 @@ const onSubmit = handleSubmit(async (values) => {
     }
 });
 
-const saveNewAuthor = handleAuthorSubmit(async (values) => {
-    const runtimeConfig = useRuntimeConfig();
-    try {
-        await axios.post(`${runtimeConfig.public.apiBase}/post/author`, values);
-        await fetchAuthors();
-        isAuthorModalOpen.value = false;
-        newAuthorName.value = "";
-        toast.success("Autor adicionado com sucesso!");
-    } catch (error) {
-        console.error("Error creating author", error);
-        toast.error("Erro ao criar autor");
-    }
-});
+// const saveNewAuthor = handleAuthorSubmit(async (values) => {
+//     const runtimeConfig = useRuntimeConfig();
+//     try {
+//         await axios.post(`${runtimeConfig.public.apiBase}/post/author`, values);
+//         await fetchAuthors();
+//         isAuthorModalOpen.value = false;
+//         newAuthorName.value = "";
+//         toast.success("Autor adicionado com sucesso!");
+//     } catch (error) {
+//         console.error("Error creating author", error);
+//         toast.error("Erro ao criar autor");
+//     }
+// });
 
-const saveNewCategory = handleCategorySubmit(async (values) => {
-    const runtimeConfig = useRuntimeConfig();
-    try {
-        await axios.post(`${runtimeConfig.public.apiBase}/post/category`, values);
-        await fetchCategories();
-        isCategoryModalOpen.value = false;
-        newCategoryName.value = "";
-        toast.success("Categoria adicionada com sucesso!");
-    } catch (error) {
-        console.error("Error creating category", error);
-        toast.error("Erro ao criar categoria");
-    }
-});
+// const saveNewCategory = handleCategorySubmit(async (values) => {
+//     const runtimeConfig = useRuntimeConfig();
+//     try {
+//         await axios.post(`${runtimeConfig.public.apiBase}/post/category`, values);
+//         await fetchCategories();
+//         isCategoryModalOpen.value = false;
+//         newCategoryName.value = "";
+//         toast.success("Categoria adicionada com sucesso!");
+//     } catch (error) {
+//         console.error("Error creating category", error);
+//         toast.error("Erro ao criar categoria");
+//     }
+// });
 
 watch(
-    () => props.isOpen,
-    (newVal) => {
-        if (newVal) {
-            fetchAuthors();
-            fetchCategories();
-        }
-    }
+    () => props.isOpen
+    // (newVal) => {
+    //     if (newVal) {
+    //         fetchAuthors();
+    //         fetchCategories();
+    //     }
+    // }
 );
 </script>
 
@@ -153,7 +171,7 @@ watch(
             <h2 class="text-2xl font-bold mb-6 text-center">Criação de post</h2>
 
             <form @submit.prevent="onSubmit" class="space-y-4">
-                <div class="flex flex-col">
+                <!-- <div class="flex flex-col">
                     <label for="author_id" class="mb-1">Autor</label>
                     <div class="flex gap-2">
                         <select id="author_id" v-model="author_id" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
@@ -167,9 +185,9 @@ watch(
                         </button>
                     </div>
                     <p v-if="errors.author_id" class="text-red-500 text-sm mt-1">{{ errors.author_id }}</p>
-                </div>
+                </div> -->
 
-                <div class="flex flex-col">
+                <!-- <div class="flex flex-col">
                     <label for="category" class="mb-1">Categoria</label>
                     <div class="flex gap-2">
                         <select id="category" v-model="category" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
@@ -183,7 +201,7 @@ watch(
                         </button>
                     </div>
                     <p v-if="errors.category" class="text-red-500 text-sm mt-1">{{ errors.category }}</p>
-                </div>
+                </div> -->
 
                 <div class="flex flex-col">
                     <label for="title" class="mb-1">Título</label>
@@ -228,7 +246,7 @@ watch(
         </div>
     </div>
 
-    <div v-if="isAuthorModalOpen" class="fixed inset-0 flex items-center justify-center z-50">
+    <!-- <div v-if="isAuthorModalOpen" class="fixed inset-0 flex items-center justify-center z-50">
         <div class="absolute inset-0 bg-black bg-opacity-70" @click="isAuthorModalOpen = false"></div>
         <div class="bg-[#181c14] border-2 border-[#ff8200] rounded-md w-full max-w-md z-10 p-6 text-white">
             <h3 class="text-xl font-bold mb-4">Adicionar novo autor</h3>
@@ -262,5 +280,5 @@ watch(
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 </template>
