@@ -19,7 +19,7 @@ const emit = defineEmits(["close", "post-created"]);
 
 const postSchema = yup.object().shape({
     author_id: yup.string().required("Autor é obrigatório"),
-    category: yup.string().required("Categoria é obrigatória"),
+    category_id: yup.string().required("Categoria é obrigatória"),
     title: yup.string().trim().required("Título é obrigatório"),
     slug: yup.string().trim().required("Slug é obrigatório"),
     description: yup.string().trim().required("Descrição é obrigatória"),
@@ -40,7 +40,7 @@ const {defineField, handleSubmit, errors, resetForm} = useForm({
 });
 
 const [author_id] = defineField("author_id");
-const [category] = defineField("category");
+const [category_id] = defineField("category_id");
 const [title] = defineField("title");
 const [slug] = defineField("slug");
 const [description] = defineField("description");
@@ -107,7 +107,7 @@ const onSubmit = handleSubmit(async (values) => {
         const sendData = {
             post: {
                 author_id: values.author_id,
-                category_id: 6,
+                category_id: values.category_id,
                 title: values.title,
                 description: values.description,
                 post_image_url: values.post_image_url,
@@ -131,31 +131,44 @@ const onSubmit = handleSubmit(async (values) => {
     }
 });
 
-// const saveNewAuthor = handleAuthorSubmit(async (values) => {
-//     const runtimeConfig = useRuntimeConfig();
-//     try {
-//         await axios.post(`${runtimeConfig.public.apiBase}/post/author`, values);
-//         await fetchAuthors();
-//         isAuthorModalOpen.value = false;
-//         newAuthorName.value = "";
-//         toast.success("Autor adicionado com sucesso!");
-//     } catch (error) {
-//         toast.error("Erro ao criar autor");
-//     }
-// });
+const saveNewAuthor = handleAuthorSubmit(async (values) => {
+    const runtimeConfig = useRuntimeConfig();
+    try {
+        const sendData = {
+            author: {
+                name: values.name,
+            },
+        };
+        const token = sessionStorage.getItem("token");
 
-// const saveNewCategory = handleCategorySubmit(async (values) => {
-//     const runtimeConfig = useRuntimeConfig();
-//     try {
-//         await axios.post(`${runtimeConfig.public.apiBase}/post/category`, values);
-//         await fetchCategories();
-//         isCategoryModalOpen.value = false;
-//         newCategoryName.value = "";
-//         toast.success("Categoria adicionada com sucesso!");
-//     } catch (error) {
-//         toast.error("Erro ao criar categoria");
-//     }
-// });
+        const response = await axios.post(`${runtimeConfig.public.apiBase}/post/create/author`, sendData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        console.log("reasd", response.data);
+        await fetchAuthors();
+        await fetchCategories();
+        isAuthorModalOpen.value = false;
+        newAuthorName.value = "";
+        toast.success("Autor adicionado com sucesso!");
+    } catch (error) {
+        toast.error("Erro ao criar autor");
+    }
+});
+
+const saveNewCategory = handleCategorySubmit(async (values) => {
+    const runtimeConfig = useRuntimeConfig();
+    try {
+        await axios.post(`${runtimeConfig.public.apiBase}/post/category`, values);
+        await fetchCategories();
+        isCategoryModalOpen.value = false;
+        newCategoryName.value = "";
+        toast.success("Categoria adicionada com sucesso!");
+    } catch (error) {
+        toast.error("Erro ao criar categoria");
+    }
+});
 
 watch(
     () => props.isOpen,
@@ -193,9 +206,9 @@ watch(
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="category" class="mb-1">Categoria</label>
+                    <label for="category_id" class="mb-1">Categoria</label>
                     <div class="flex gap-2">
-                        <select id="category" v-model="category" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
+                        <select id="category_id" v-model="category_id" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
                             <option value="" disabled>Selecione uma categoria</option>
                             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                                 {{ cat.name }}
@@ -205,7 +218,7 @@ watch(
                             <Icon name="material-symbols:add" class="bg-black w-5 h-5" />
                         </button>
                     </div>
-                    <p v-if="errors.category" class="text-red-500 text-sm mt-1">{{ errors.category }}</p>
+                    <p v-if="errors.category_id" class="text-red-500 text-sm mt-1">{{ errors.category_id }}</p>
                 </div>
 
                 <div class="flex flex-col">
