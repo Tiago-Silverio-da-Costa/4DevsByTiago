@@ -127,7 +127,7 @@ export default {
                         isInCodeBlock = false;
                         codeBlockContent.push(line.replace(/<\/code>/, ""));
                         newContent.push(
-                            `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-white overflow-auto"><code>${codeBlockContent
+                            `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-[#FF8200] overflow-auto"><code>${codeBlockContent
                                 .join("\n")
                                 .replace(/</g, "&lt;")
                                 .replace(/>/g, "&gt;")}</code></pre>`

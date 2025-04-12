@@ -69,7 +69,6 @@ const onSubmit = handleSubmit(async (values) => {
     }
 
     const token = sessionStorage.getItem("token");
-    const user_id = sessionStorage.getItem("userId");
     const runtimeConfig = useRuntimeConfig();
 
     addingComment.value = true;
@@ -81,7 +80,6 @@ const onSubmit = handleSubmit(async (values) => {
                 comment: {
                     post_id: props.postId,
                     content: values.comment,
-                    user_id: Number(user_id),
                     parent_id: null,
                 },
             },
