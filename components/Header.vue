@@ -12,7 +12,7 @@
                 </NuxtLink>
                 <NuxtLink :to="`/home/register`" class="flex items-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] font-bold">
                     <Icon name="mdi:register-outline" class="bg-black w-6 h-6" />
-                    <spas class="text-black">Sign up</spas>
+                    <span class="text-black">Sign up</span>
                 </NuxtLink>
             </div>
             <div v-else class="md:flex items-center gap-2 hidden">

@@ -31,17 +31,17 @@ const timeAgo = (createdAt) => {
     const diffMs = now - past;
 
     const diffSeconds = Math.floor(diffMs / 1000);
-    if (diffSeconds < 60) return "agora mesmo";
+    if (diffSeconds < 60) return "just now";
     const diffMinutes = Math.floor(diffSeconds / 60);
-    if (diffMinutes < 60) return `há ${diffMinutes} minuto${diffMinutes !== 1 ? "s" : ""}`;
+    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `há ${diffHours} hora${diffHours !== 1 ? "s" : ""}`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 30) return `há ${diffDays} dia${diffDays !== 1 ? "s" : ""}`;
+    if (diffDays < 30) return `${diffDays} days${diffDays !== 1 ? "s" : ""} ago`;
     const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths < 12) return `há ${diffMonths} mês${diffMonths !== 1 ? "es" : ""}`;
+    if (diffMonths < 12) return `${diffMonths} month${diffMonths !== 1 ? "es" : ""} ago`;
     const diffYears = Math.floor(diffDays / 365);
-    return `há ${diffYears} ano${diffYears !== 1 ? "s" : ""}`;
+    return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
 };
 
 const submitReply = async () => {
@@ -92,14 +92,14 @@ const submitReply = async () => {
             <p class="text-sm text-gray-500 mt-1">{{ timeAgo(comment.created_at) }}</p>
         </div>
         <p class="mt-2 break-words">{{ comment.content }}</p>
-        <button @click="showReplyForm = !showReplyForm" class="text-[#FF8200] mt-2">Responder</button>
+        <button @click="showReplyForm = !showReplyForm" class="text-[#FF8200] mt-2">Reply</button>
         <div v-if="showReplyForm" class="mt-2">
             <textarea
                 v-model="replyContent"
                 class="overflow-hidden resize-none block mr-2 p-2.5 w-full text-sm rounded-lg border outline-none text-gray-900 bg-[#27292b] border-[#1e2022] focus:ring-[#FF8200] focus:border-[#FF8200] dark:border-gray-600 dark:placeholder-white dark:text-white"
                 placeholder="Escreva sua resposta..."
             ></textarea>
-            <button @click.prevent="submitReply" class="mt-2 bg-[#FF8200] text-white px-4 py-2 rounded" :disabled="addingReply">Enviar Resposta</button>
+            <button @click.prevent="submitReply" class="mt-2 bg-[#FF8200] text-white px-4 py-2 rounded" :disabled="addingReply">Send</button>
         </div>
     </div>
     <div v-if="comment.replies && comment.replies.length > 0" class="mt-2">

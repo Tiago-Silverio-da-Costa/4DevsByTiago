@@ -143,12 +143,10 @@ onMounted(() => {
 
 <template>
     <div class="flex flex-col items-start w-full justify-center mt-8">
-        <h2 class="text-2xl font-bold mb-4">{{ comments.length }} Comentários</h2>
+        <h2 class="text-2xl font-bold mb-4">{{ comments.length }} Comments</h2>
         <div v-if="!isAuthenticated" class="flex items-center self-center gap-4 bg-[#FF8200] rounded-md px-8 py-4 my-4">
             <Icon name="material-symbols:link-rounded" class="bg-black w-6 h-6" />
-            <NuxtLink :to="`/home/login`" class="flex justify-center self-center items-center text-black text-center text-md font-bold h-fit">
-                Faça login para adicionar um comentário
-            </NuxtLink>
+            <NuxtLink :to="`/home/login`" class="flex justify-center self-center items-center text-black text-center text-md font-bold h-fit"> Log in to add a comment </NuxtLink>
             <Icon name="material-symbols:link-rounded" class="bg-black w-6 h-6" />
         </div>
 
@@ -193,8 +191,8 @@ onMounted(() => {
 
         <div v-if="comments.length" class="w-full mt-4">
             <div class="flex gap-2 mb-4">
-                <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais recentes</button>
-                <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Mais antigos</button>
+                <button @click="sortComments('recent')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Newest comments</button>
+                <button @click="sortComments('oldest')" class="px-3 py-1 rounded bg-[#27292b] text-white hover:bg-[#FF8200]">Oldest comments</button>
             </div>
             <div>
                 <CommentItem v-for="comment in commentTree" :key="comment.id" :comment="comment" :is-response="false" :post-id="postId" @refresh-comments="fetchComments" />
@@ -202,7 +200,7 @@ onMounted(() => {
         </div>
 
         <div v-else class="flex justify-center self-center items-center text-black text-center text-md font-bold bg-[#FF8200] px-8 py-4 h-fit rounded-md my-8">
-            Ainda não há comentários. Seja o primeiro a comentar!
+            No comments yet. Be the first to comment!
         </div>
     </div>
 </template>
