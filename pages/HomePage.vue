@@ -241,7 +241,7 @@ export default {
                         class="flex flex-col bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden"
                     >
                         <div class="relative bg-[#181C14] border-b-2 border-b-[#FF8200]">
-                            <NuxtImg :src="post.post_image_url" alt="image" width="400" height="200" />
+                            <img :src="post.post_image_url" alt="image" width="400" height="200" />
                             <div v-if="isAdmin" class="flex items-center gap-4 absolute top-4 right-4">
                                 <button
                                     @click="openEditModal(post)"
