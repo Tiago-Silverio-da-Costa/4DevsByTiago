@@ -143,7 +143,7 @@ export default {
                                     month: "2-digit",
                                     day: "2-digit",
                                 }) +
-                                " às " +
+                                " at " +
                                 new Date(post.publication_date).toLocaleTimeString("pt-BR", {
                                     hour: "2-digit",
                                     minute: "2-digit",
@@ -174,7 +174,6 @@ export default {
         axios
             .get(`${runtimeConfig.public.apiBase}/post`)
             .then((response) => {
-                this.posts = response.data.data;
                 this.posts = response.data.data
                     .map((post) => ({
                         ...post,
@@ -184,7 +183,7 @@ export default {
                                 month: "2-digit",
                                 day: "2-digit",
                             }) +
-                            " às " +
+                            " at " +
                             new Date(post.publication_date).toLocaleTimeString("pt-BR", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -207,12 +206,12 @@ export default {
 
             <div class="flex flex-wrap gap-4 mt-4">
                 <select v-model="sortOrder" @change="currentPage = 1" class="bg-[#181C14] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md">
-                    <option value="newest">Mais recente</option>
-                    <option value="oldest">Mais antigo</option>
+                    <option value="newest">Newest posts</option>
+                    <option value="oldest">Oldest posts</option>
                 </select>
 
                 <select v-model="selectedCategory" @change="currentPage = 1" class="bg-[#181C14] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md">
-                    <option value="">Todas as categorias</option>
+                    <option value="">All categories</option>
                     <option v-for="category in categories" :key="category" :value="category">
                         {{ category }}
                     </option>
@@ -281,7 +280,7 @@ export default {
                 <button @click="prevPage" :disabled="current === 1" class="flex items-center justify-center px-2 py-1 bg-[#FF8200] text-white rounded-md font-bold">
                     <Icon name="iconamoon:arrow-left-2" class="bg-black w-6 h-6" />
                 </button>
-                <span>Página {{ currentPage }} de {{ totalPages }}</span>
+                <span>Page {{ currentPage }} of {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages" class="flex items-center justify-center px-2 py-1 bg-[#FF8200] text-white rounded-md font-bold">
                     <Icon name="iconamoon:arrow-right-2" class="bg-black w-6 h-6" />
                 </button>
