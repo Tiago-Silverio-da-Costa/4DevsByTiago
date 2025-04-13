@@ -12,23 +12,27 @@ export const useAuthStore = defineStore("auth", {
     },
     actions: {
         async loadUser() {
-            this.token = sessionStorage.getItem("token");
-            if (this.token) {
-                try {
-                    const runtimeConfig = useRuntimeConfig();
-                    const response = await axios.get(`${runtimeConfig.public.apiBase}/user/session`, {
-                        headers: {Authorization: `Bearer ${this.token}`},
-                    });
-                    this.user = response.data.results;
-                } catch (error) {
-                    this.logout();
+            if (import.meta.client) {
+                this.token = sessionStorage.getItem("token");
+                if (this.token) {
+                    try {
+                        const runtimeConfig = useRuntimeConfig();
+                        const response = await axios.get(`${runtimeConfig.public.apiBase}/user/session`, {
+                            headers: {Authorization: `Bearer ${this.token}`},
+                        });
+                        this.user = response.data.results;
+                    } catch (error) {
+                        this.logout();
+                    }
                 }
             }
         },
         logout() {
             this.token = null;
             this.user = null;
-            sessionStorage.removeItem("token");
+            if (import.meta.client) {
+                sessionStorage.removeItem("token");
+            }
             navigateTo("/home/login");
         },
     },
