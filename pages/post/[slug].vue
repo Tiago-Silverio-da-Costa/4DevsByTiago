@@ -2,7 +2,7 @@
     <div v-if="post" class="flex flex-col justify-between flex-wrap bg-[#3C3D37] text-white min-h-screen">
         <Header />
         <div class="overflow-hidden h-80 flex items-center mb-20">
-            <NuxtImg v-if="post.post_image_url" :src="post.post_image_url" alt="image" width="100%" height="200" />
+            <img v-if="post.post_image_url" :src="post.post_image_url" alt="image" width="100%" height="200" />
         </div>
 
         <div class="mx-auto w-5/6 max-w-3xl py-4">
