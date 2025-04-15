@@ -97,7 +97,7 @@ const submitReply = async () => {
             <textarea
                 v-model="replyContent"
                 class="overflow-hidden resize-none block mr-2 p-2.5 w-full text-sm rounded-lg border outline-none text-gray-900 bg-[#27292b] border-[#1e2022] focus:ring-[#FF8200] focus:border-[#FF8200] dark:border-gray-600 dark:placeholder-white dark:text-white"
-                placeholder="Escreva sua resposta..."
+                placeholder="Write your reply..."
             ></textarea>
             <button @click.prevent="submitReply" class="mt-2 bg-[#FF8200] text-white px-4 py-2 rounded" :disabled="addingReply">Send</button>
         </div>
