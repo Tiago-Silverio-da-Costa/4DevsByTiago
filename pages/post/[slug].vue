@@ -69,6 +69,41 @@ export default {
                 toast.error("Erro ao buscar post!");
             });
     },
+    head() {
+        if (this.post) {
+            return {
+                title: this.post.title,
+                meta: [
+                    {
+                        hid: "description",
+                        name: "description",
+                        content: this.introductionContent.replace(/<[^>]+>/g, "").substring(0, 160) || "Leia mais sobre programação e tecnologia no 4devsbyTiagoSC.",
+                    },
+                    {
+                        hid: "keywords",
+                        name: "keywords",
+                        content: `${this.post.category_name}, programação, tecnologia, desenvolvimento`,
+                    },
+                    {
+                        hid: "author",
+                        name: "author",
+                        content: "Tiago SC",
+                    },
+                ],
+            };
+        } else {
+            return {
+                title: "Carregando... - 4devsbyTiagoSC",
+                meta: [
+                    {
+                        hid: "description",
+                        name: "description",
+                        content: "Carregando um post do blog 4devsbyTiagoSC...",
+                    },
+                ],
+            };
+        }
+    },
     methods: {
         parseContent(content) {
             const lines = content.split("\n");
