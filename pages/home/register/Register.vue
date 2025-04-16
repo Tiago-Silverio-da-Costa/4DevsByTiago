@@ -52,6 +52,22 @@ const onSubmit = handleSubmit(async (values) => {
         isLoading.value = false;
     }
 });
+
+useHead(() => {
+    return {
+        title: "Cadastro - 4devsbyTiagoSC",
+        meta: [
+            {
+                name: "description",
+                content: "Área de cadastro no 4devsbyTiagoSC.",
+            },
+            {
+                name: "keywords",
+                content: `programação, tecnologia, desenvolvimento`,
+            },
+        ],
+    };
+});
 </script>
 
 <template>

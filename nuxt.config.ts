@@ -1,25 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@nuxt/image', '@nuxt/icon', '@nuxtjs/sitemap', '@nuxtjs/robots'],
-  // sitemap: {
-  //   hostname: 'https://4devsbytiagosc.com',
-  //   routes: async () => {
-  //     const runtimeConfig = useRuntimeConfig()
-  //     const response = await axios.get(`${runtimeConfig.public.apiBase}/posts`);
-  //     const posts = response.data.data;
-  //     return posts.map(post => `/post/${post.slug}`);
-  //   }
-  // },
-  // robots: {
-  //   : [
-  //     {
-  //       UserAgent: '*',
-  //       Disallow: '/admin',
-  //     }
-  //   ],
-
-  //   sitemap: 'https://4devsbytiagosc.com/sitemap.xml'
-  // },
   build: {
     transpile: ['vue-toastification'],
   },

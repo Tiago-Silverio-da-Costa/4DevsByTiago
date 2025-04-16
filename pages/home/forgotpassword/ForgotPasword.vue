@@ -119,6 +119,21 @@ const onSubmitPassword = handlePasswordSubmit(async (values) => {
         isLoading.value = false;
     }
 });
+useHead(() => {
+    return {
+        title: "Esqueci a senha - 4devsbyTiagoSC",
+        meta: [
+            {
+                name: "description",
+                content: "Área de esquecia a senha no 4devsbyTiagoSC.",
+            },
+            {
+                name: "keywords",
+                content: `programação, tecnologia, desenvolvimento`,
+            },
+        ],
+    };
+});
 </script>
 
 <template>

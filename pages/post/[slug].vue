@@ -24,170 +24,157 @@
     </div>
 </template>
 
-<script>
-import axios from "axios";
-import Comments from "@/components/Comments.vue";
+<script setup>
+import {ref, onMounted, useRoute, useHead, useRuntimeConfig} from "#imports";
 import {useToast} from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import axios from "axios";
+import Comments from "@/components/Comments.vue";
 
-export default {
-    components: {
-        Comments,
-    },
-    data() {
-        return {
-            post: null,
-            introductionContent: "",
-            processedContent: "",
-            summary: [],
-            formattedPublicationDate: "",
-        };
-    },
-    created() {
-        const slug = this.$route.params.slug;
-        const runtimeConfig = useRuntimeConfig();
-        const toast = useToast();
-        axios
-            .get(`${runtimeConfig.public.apiBase}/post/slug/${slug}`)
-            .then((response) => {
-                const post = response.data.data;
-                this.post = post;
-                const publicationDate = new Date(response.data.data.publication_date);
-                this.formattedPublicationDate = `${publicationDate.toLocaleDateString("pt-BR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                })} at ${publicationDate.toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                })} (GMT-3 São Paulo time)`;
+const post = ref(null);
+const introductionContent = ref("");
+const processedContent = ref("");
+const summary = ref([]);
+const formattedPublicationDate = ref("");
 
-                this.parseContent(post.content);
-            })
-            .catch((error) => {
-                toast.error("Erro ao buscar post!");
-            });
-    },
-    head() {
-        if (this.post) {
-            return {
-                title: this.post.title,
-                meta: [
-                    {
-                        hid: "description",
-                        name: "description",
-                        content: this.introductionContent.replace(/<[^>]+>/g, "").substring(0, 160) || "Leia mais sobre programação e tecnologia no 4devsbyTiagoSC.",
-                    },
-                    {
-                        hid: "keywords",
-                        name: "keywords",
-                        content: `${this.post.category_name}, programação, tecnologia, desenvolvimento`,
-                    },
-                    {
-                        hid: "author",
-                        name: "author",
-                        content: "Tiago SC",
-                    },
-                ],
-            };
-        } else {
-            return {
-                title: "Carregando... - 4devsbyTiagoSC",
-                meta: [
-                    {
-                        hid: "description",
-                        name: "description",
-                        content: "Carregando um post do blog 4devsbyTiagoSC...",
-                    },
-                ],
-            };
+const route = useRoute();
+const toast = useToast();
+const config = useRuntimeConfig();
+
+function parseContent(content) {
+    const lines = content.split("\n");
+    const newContent = [];
+    const intro = [];
+    const titles = [];
+    let isInCodeBlock = false;
+    let codeBlockContent = [];
+    let isFirstTitleFound = false;
+
+    lines.forEach((line) => {
+        const isTitle = line.startsWith("<title>");
+        const isImage = line.includes("<image>") && line.includes("</image>");
+        const isCodeStart = line.startsWith("<code>");
+        const isCodeEnd = line.endsWith("</code>");
+        const isList = line.startsWith("-");
+
+        if (!content) return;
+
+        if (isTitle) {
+            isFirstTitleFound = true;
+            const title = line.replace(/<\/?title>/g, "").trim();
+            const formattedTitle = title.replace(/\s+/g, "-");
+            titles.push({title, formattedTitle});
+
+            newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2>`);
+            return;
         }
-    },
-    methods: {
-        parseContent(content) {
-            const lines = content.split("\n");
-            const newContent = [];
-            const introductionContent = [];
-            const titles = [];
-            let isInCodeBlock = false;
-            let codeBlockContent = [];
-            let isFirstTitleFound = false;
 
-            lines.forEach((line, index) => {
-                const isTitle = line.startsWith("<title>");
-                const isImage = line.includes("<image>") && line.includes("</image>");
-                const isCodeStart = line.startsWith("<code>");
-                const isCodeEnd = line.endsWith("</code>");
-                const IsList = line.startsWith("-");
+        if (!isFirstTitleFound) {
+            if (isImage) {
+                const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
+                intro.push(`<img class="w-full" src="${imgSrc}" alt="Introduction Image" />`);
+                return;
+            }
 
-                if (!content) return;
+            intro.push(`<p>${line}</p><br />`);
+            return;
+        }
 
-                if (isTitle) {
-                    isFirstTitleFound = true;
-                    const title = line.replace(/<\/?title>/g, "").trim();
-                    const formattedTitle = title.replace(/\s+/g, "-");
-                    titles.push({title, formattedTitle});
+        if (isImage) {
+            const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
+            newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
+            return;
+        }
 
-                    newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2>`);
-                    return;
-                }
+        if (isCodeStart) {
+            isInCodeBlock = true;
+            codeBlockContent.push(line.replace(/<code>/, ""));
+            return;
+        }
 
-                if (!isFirstTitleFound) {
-                    if (isImage) {
-                        const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
-                        introductionContent.push(`<img class="w-full" src="${imgSrc}" alt="Introduction Image" />`);
-                        return;
-                    }
+        if (isInCodeBlock) {
+            if (isCodeEnd) {
+                isInCodeBlock = false;
+                codeBlockContent.push(line.replace(/<\/code>/, ""));
+                newContent.push(
+                    `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-[#FF8200] overflow-auto"><code>${codeBlockContent
+                        .join("\n")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")}</code></pre>`
+                );
+                codeBlockContent = [];
+            } else {
+                codeBlockContent.push(line);
+            }
+            return;
+        }
 
-                    introductionContent.push(`<p>${line}</p><br />`);
-                    return;
-                }
+        if (isList) {
+            const listItem = line.slice(1).trim();
+            newContent.push(`<li>${listItem}</li>`);
+            return;
+        }
 
-                if (isImage) {
-                    const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
-                    newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
-                    return;
-                }
+        newContent.push(`<p>${line}</p><br />`);
+    });
 
-                if (isCodeStart) {
-                    isInCodeBlock = true;
+    introductionContent.value = intro.join("");
+    processedContent.value = newContent.join("");
+    summary.value = titles;
+}
 
-                    codeBlockContent.push(line.replace(/<code>/, ""));
-                    return;
-                }
+onMounted(async () => {
+    const slug = route.params.slug;
+    try {
+        const response = await axios.get(`${config.public.apiBase}/post/slug/${slug}`);
+        post.value = response.data.data;
 
-                if (isInCodeBlock) {
-                    if (isCodeEnd) {
-                        isInCodeBlock = false;
-                        codeBlockContent.push(line.replace(/<\/code>/, ""));
-                        newContent.push(
-                            `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-[#FF8200] overflow-auto"><code>${codeBlockContent
-                                .join("\n")
-                                .replace(/</g, "&lt;")
-                                .replace(/>/g, "&gt;")}</code></pre>`
-                        );
-                        codeBlockContent = [];
-                    } else {
-                        codeBlockContent.push(line);
-                    }
+        const publicationDate = new Date(post.value.publication_date);
+        formattedPublicationDate.value = `${publicationDate.toLocaleDateString("pt-BR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        })} at ${publicationDate.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        })} (GMT-3 São Paulo time)`;
 
-                    return;
-                }
+        parseContent(post.value.content);
+    } catch (error) {
+        toast.error("Erro ao buscar post!");
+    }
+});
 
-                if (IsList) {
-                    const listItem = line.slice(1).trim();
-                    newContent.push(`<li>${listItem}</li>`);
-                    return;
-                }
-
-                newContent.push(`<p>${line}</p><br />`);
-            });
-
-            this.introductionContent = introductionContent.join("");
-            this.processedContent = newContent.join("");
-            this.summary = titles;
-        },
-    },
-};
+useHead(() => {
+    if (post.value) {
+        return {
+            title: post.value.title + " - 4devsbyTiagoSC",
+            meta: [
+                {
+                    name: "description",
+                    content: introductionContent.value.replace(/<[^>]+>/g, "").substring(0, 160) || "Leia mais sobre programação e tecnologia no 4devsbyTiagoSC.",
+                },
+                {
+                    name: "keywords",
+                    content: `${post.value.category_name}, programação, tecnologia, desenvolvimento`,
+                },
+                {
+                    name: "author",
+                    content: "Tiago SC",
+                },
+            ],
+        };
+    } else {
+        return {
+            title: "Carregando... - 4devsbyTiagoSC",
+            meta: [
+                {
+                    name: "description",
+                    content: "Carregando um post do blog 4devsbyTiagoSC...",
+                },
+            ],
+        };
+    }
+});
 </script>
