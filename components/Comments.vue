@@ -52,14 +52,6 @@ const commentTree = computed(() => {
     return buildCommentTree(sorted);
 });
 
-const sortedComments = computed(() => {
-    return [...comments.value].sort((a, b) => {
-        const dateA = new Date(a.created_at);
-        const dateB = new Date(b.created_at);
-        return sortOrder.value === "recent" ? dateB - dateA : dateA - dateB;
-    });
-});
-
 const onSubmit = handleSubmit(async (values) => {
     if (!isAuthenticated.value) return;
 
@@ -152,21 +144,6 @@ onMounted(() => {
 
         <form v-if="isAuthenticated" @submit.prevent="onSubmit" class="w-full mt-4">
             <div class="flex items-center px-3 py-2 rounded-lg bg-[#1e2022]">
-                <!-- <button
-                    type="button"
-                    class="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
-                >
-                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                        <path
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM4.6 11a5.5 5.5 0 0 0 10.81 0H4.6Z"
-                        />
-                    </svg>
-                    <span class="sr-only">Add emoji</span>
-                </button> -->
                 <textarea
                     id="comments"
                     v-model="commentValidation"
@@ -176,7 +153,7 @@ onMounted(() => {
                     @focus="showSubmitButton = true"
                     @blur="checkSubmitButtonVisibility"
                     class="overflow-hidden resize-none block mr-2 p-2.5 w-full text-sm rounded-lg border outline-none text-gray-900 bg-[#27292b] border-[#1e2022] focus:ring-[#FF8200] focus:border-[#FF8200] dark:border-gray-600 dark:placeholder-white dark:text-white"
-                    placeholder="Adicionar um comentário..."
+                    placeholder="Add a comment..."
                 ></textarea>
                 <button
                     type="submit"

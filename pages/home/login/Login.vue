@@ -53,6 +53,22 @@ const onSubmit = handleSubmit(async (values) => {
         isLoading.value = false;
     }
 });
+
+useHead(() => {
+    return {
+        title: "Login - 4devsbyTiagoSC",
+        meta: [
+            {
+                name: "description",
+                content: "Área de login no 4devsbyTiagoSC.",
+            },
+            {
+                name: "keywords",
+                content: `programação, tecnologia, desenvolvimento`,
+            },
+        ],
+    };
+});
 </script>
 
 <template>
