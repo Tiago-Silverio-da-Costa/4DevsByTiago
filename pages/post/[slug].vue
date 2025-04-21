@@ -142,7 +142,7 @@ onMounted(async () => {
 
         parseContent(post.value.content);
     } catch (error) {
-        toast.error("Erro ao buscar post!");
+        toast.error("Error when trying to find post!");
     }
 });
 

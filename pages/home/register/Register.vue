@@ -42,11 +42,11 @@ const onSubmit = handleSubmit(async (values) => {
         const response = await axios.post(`${runtimeConfig.public.apiBase}/user/register`, dataSend);
 
         if (response.status === 200 || response.status === 201) {
-            toast.success("Cadastro realizado com sucesso!");
+            toast.success("User created!");
             navigateTo("/home/login");
         }
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "An error occured while logging in";
+        const errorMessage = error.response?.data?.message || "Something went wrong. Try again.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;

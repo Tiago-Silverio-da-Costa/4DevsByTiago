@@ -60,7 +60,7 @@ const onSubmitEmail = handleEmailSubmit(async (values) => {
         sessionStorage.setItem("fg-email", values.email);
         forgotPasswordStore.nextStep(2);
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Algo deu errado. Tente novamente.";
+        const errorMessage = error.response?.data?.message || "Something went wrong. Try again.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
@@ -79,7 +79,7 @@ const onSubmitCode = handleCodeSubmit(async (values) => {
         toast.success("Code verified successfully.");
         forgotPasswordStore.nextStep(3);
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Algo deu errado. Tente novamente.";
+        const errorMessage = error.response?.data?.message || "Something went wrong. Try again.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
@@ -91,7 +91,7 @@ const onSubmitPassword = handlePasswordSubmit(async (values) => {
     try {
         const expiration = sessionStorage.getItem("fg-token-expiration");
         if (Date.now() > expiration) {
-            toast.error("Token expirado. Por favor, solicite um novo código.");
+            toast.error("Expired code. Please, request a new code.");
             return;
         }
         const runtimeConfig = useRuntimeConfig();
@@ -113,7 +113,7 @@ const onSubmitPassword = handlePasswordSubmit(async (values) => {
         sessionStorage.removeItem("fg-token-expiration");
         navigateTo("/home/login");
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Algo deu errado. Tente novamente.";
+        const errorMessage = error.response?.data?.message || "Something went wrong. Try again.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
@@ -141,14 +141,11 @@ useHead(() => {
         <div class="flex flex-col justify-center items-center gap-4 mx-auto w-5/6 max-w-xs py-8 h-screen">
             <NuxtImg src="/logo-no-name.svg" alt="image" width="100" height="200" />
 
-            <!-- Cabeçalhos Dinâmicos -->
             <h1 v-if="forgotPasswordStore.step === 1" class="text-white text-3xl font-bold">Forgot Password</h1>
             <h1 v-else-if="forgotPasswordStore.step === 2" class="text-white text-3xl font-bold">Verify Code</h1>
             <h1 v-else-if="forgotPasswordStore.step === 3" class="text-white text-3xl font-bold">Reset Password</h1>
 
-            <!-- Conteúdo Dinâmico -->
             <div class="w-full">
-                <!-- Etapa 1 -->
                 <div v-if="forgotPasswordStore.step === 1">
                     <p class="text-white font-medium text-sm text-center">Insert your email for the code verification.</p>
                     <div class="w-full flex flex-col justify-center items-center mt-8">
@@ -178,7 +175,6 @@ useHead(() => {
                     </div>
                 </div>
 
-                <!-- Etapa 2 -->
                 <div v-else-if="forgotPasswordStore.step === 2">
                     <p class="text-white font-medium text-sm text-center">Insert the verification code sent to your email.</p>
                     <form @submit="onSubmitCode" class="w-full flex flex-col justify-center items-center mt-8">
@@ -205,7 +201,6 @@ useHead(() => {
                     </form>
                 </div>
 
-                <!-- Etapa 3 -->
                 <div v-else-if="forgotPasswordStore.step === 3">
                     <p class="text-white font-medium text-sm text-center">Create a new password for your account.</p>
                     <form @submit="onSubmitPassword" class="w-full flex flex-col justify-center items-center mt-8">
