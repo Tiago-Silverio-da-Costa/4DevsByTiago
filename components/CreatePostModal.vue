@@ -260,7 +260,7 @@ watch(
                     <textarea
                         id="content"
                         v-model="content"
-                        rows="6"
+                        rows="20"
                         class="bg-[#2c2f31] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md resize-none"
                     ></textarea>
                     <p v-if="errors.content" class="text-red-500 text-sm mt-1">{{ errors.content }}</p>
