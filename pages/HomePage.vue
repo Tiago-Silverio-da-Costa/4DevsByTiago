@@ -205,12 +205,12 @@ export default {
             <Search @search="updateSearchQuery" :intialQuery="searchQuery" />
 
             <div class="flex flex-wrap gap-4 mt-4">
-                <select v-model="sortOrder" @change="currentPage = 1" class="bg-[#181C14] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md">
+                <select v-model="sortOrder" @change="currentPage = 1" class="bg-[#181C14] border border-[#FF8200] outline-none text-white px-4 py-2 rounded-md">
                     <option value="newest">Newest posts</option>
                     <option value="oldest">Oldest posts</option>
                 </select>
 
-                <select v-model="selectedCategory" @change="currentPage = 1" class="bg-[#181C14] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md">
+                <select v-model="selectedCategory" @change="currentPage = 1" class="bg-[#181C14] border border-[#FF8200] outline-none text-white px-4 py-2 rounded-md">
                     <option value="">All categories</option>
                     <option v-for="category in categories" :key="category" :value="category">
                         {{ category }}
@@ -222,7 +222,7 @@ export default {
                     class="flex items-center justify-center gap-1 px-4 py-2 rounded-md bg-[#FF8200] transition-all active:bg-[#ff84009d] font-bold"
                 >
                     <Icon name="material-symbols:post-add" class="bg-black w-5 h-5" />
-                    <span class="text-black">novo post</span>
+                    <span class="text-black">New post</span>
                 </button>
             </div>
 
@@ -238,9 +238,9 @@ export default {
                     <div
                         v-for="post in paginationPosts"
                         :key="post.id"
-                        class="flex flex-col bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 border-2 border-[#FF8200] rounded-md overflow-hidden"
+                        class="flex flex-col bg-[#181C14] hover:scale-105 transition-all duration-300 mt-4 w-96 rounded-md overflow-hidden"
                     >
-                        <div class="relative bg-[#181C14] border-b-2 border-b-[#FF8200]">
+                        <div class="relative bg-[#181C14] border-b border-b-[#FF8200]">
                             <img :src="post.post_image_url" alt="image" width="400" height="200" />
                             <div v-if="isAdmin" class="flex items-center gap-4 absolute top-4 right-4">
                                 <button
@@ -264,7 +264,7 @@ export default {
                                 <p class="text-md flex max-w-md">{{ post.description }}</p>
                             </div>
 
-                            <div class="flex px-8 py-4 items-center justify-between border-t-2 border-t-[#FF8200] text-[#FF8200]">
+                            <div class="flex px-8 py-4 items-center justify-between border-t border-t-[#FF8200] text-[#FF8200]">
                                 <div class="flex items-center gap-2">
                                     <Icon name="formkit:date" class="w-4 h-4" />
                                     <span>{{ post.formattedPublicationDate }}</span>
