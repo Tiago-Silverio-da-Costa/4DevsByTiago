@@ -43,110 +43,101 @@ const toast = useToast();
 const config = useRuntimeConfig();
 
 function parseContent(content) {
-    if (!content) return;
-
     const lines = content.split("\n");
     const newContent = [];
     const intro = [];
     const titles = [];
-    let isFirstTitleFound = false;
     let isInCodeBlock = false;
     let codeBlockContent = [];
-    let isInBlockQuote = false;
-    let blockQuoteContent = [];
+    let isFirstTitleFound = false;
 
     lines.forEach((line) => {
-        console.log("Linha atual:", line);
-        const trimmedLine = line.trim();
-        if (!trimmedLine) return;
+        const isTitle = line.startsWith("<title>");
+        const isImage = line.includes("<image>") && line.includes("</image>");
+        const isCodeStart = line.startsWith("<code>");
+        const isCodeEnd = line.endsWith("</code>");
+        const isList = line.startsWith("-");
+        const isQuote = line.includes("<blockquote>") && line.includes("</blockquote>");
 
-        const isTitle = trimmedLine.startsWith("<title>");
-        const isImage = trimmedLine.includes("<image>") && trimmedLine.includes("</image>");
-        const isCodeStart = trimmedLine.startsWith("<code>");
-        const isCodeEnd = trimmedLine.endsWith("</code>");
-        const isList = trimmedLine.startsWith("-");
-        const isBlockQuoteStart = trimmedLine.startsWith("<blockquote>");
-        const isBlockQuoteEnd = trimmedLine.endsWith("</blockquote>");
+        if (!content) return;
 
         if (isTitle) {
             isFirstTitleFound = true;
-            const title = trimmedLine.replace(/<\/?title>/g, "").trim();
+            const title = line.replace(/<\/?title>/g, "").trim();
             const formattedTitle = title.replace(/\s+/g, "-");
             titles.push({title, formattedTitle});
+
             newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2></br>`);
             return;
         }
 
         if (!isFirstTitleFound) {
             if (isImage) {
-                const imgSrc = trimmedLine.replace(/<image>|<\/image>/g, "").trim();
+                const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
                 intro.push(`<img class="w-full" src="${imgSrc}" alt="Introduction Image" />`);
-            } else {
-                intro.push(`<p>${trimmedLine}</p>`);
+                return;
             }
-            return;
-        }
 
-        if (isBlockQuoteStart) {
-            isInBlockQuote = true;
-            blockQuoteContent.push(trimmedLine.replace("<blockquote>", "").trim());
-            return;
-        }
-
-        if (isInBlockQuote) {
-            if (isBlockQuoteEnd) {
-                isInBlockQuote = false;
-                blockQuoteContent.push(trimmedLine.replace("</blockquote>", "").trim());
-                const quote = blockQuoteContent.join(" ").trim();
-                newContent.push(
-                    `<blockquote class="border-l-4 border-l-white" cite="https://4devsbytiagosc.com.br">
-                        <p class="px-4 italic leading-[1.625]">"${quote}"</p>
-                        <footer class="px-4">— Franklin D. Roosevelt</footer>
-                    </blockquote></br>`
-                );
-                blockQuoteContent = [];
-            } else {
-                blockQuoteContent.push(trimmedLine);
-            }
+            intro.push(`<p>${line}</p>`);
             return;
         }
 
         if (isImage) {
-            const imgSrc = trimmedLine.replace(/<image>|<\/image>/g, "").trim();
+            const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
             newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
+            return;
+        }
+
+        if (isQuote) {
+            const quoteMatch = line.match(/<blockquote>(.*?)(?:<author>.*<\/author>)?<\/blockquote>/);
+            const quote = quoteMatch ? quoteMatch[1].trim() : "";
+
+            const authorMatch = line.match(/<author>(.*?)<\/author>/);
+            const author = authorMatch ? authorMatch[1].trim() : "";
+
+            newContent.push(
+                `<blockquote class="border-l-4 border-l-white" cite="https://4devsbytiagosc.com.br">
+                    <p class="px-4 italic leading-[1.625]">
+                         &ldquo;Esta é uma citação tirada da Mozilla Developer Center.${quote}&ldquo;
+                    </p>
+                    <footer class="px-4">— ${author}</footer>
+                </blockquote>
+                </br>
+`
+            );
             return;
         }
 
         if (isCodeStart) {
             isInCodeBlock = true;
-            codeBlockContent.push(trimmedLine.replace("<code>", ""));
+            codeBlockContent.push(line.replace(/<code>/, ""));
             return;
         }
 
         if (isInCodeBlock) {
             if (isCodeEnd) {
                 isInCodeBlock = false;
-                codeBlockContent.push(trimmedLine.replace("</code>", ""));
+                codeBlockContent.push(line.replace(/<\/code>/, ""));
                 newContent.push(
                     `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-[#FF8200] overflow-auto"><code>${codeBlockContent
                         .join("\n")
-                        .replace(/</g, "<")
-                        .replace(/>/g, ">")}</code></pre>`
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")}</code></pre>`
                 );
                 codeBlockContent = [];
             } else {
-                codeBlockContent.push(trimmedLine);
+                codeBlockContent.push(line);
             }
             return;
         }
 
         if (isList) {
-            const listItem = trimmedLine.slice(1).trim();
+            const listItem = line.slice(1).trim();
             newContent.push(`<li>${listItem}</li>`);
             return;
         }
 
-        newContent.push(`<p>${trimmedLine}</p>`);
+        newContent.push(`<p>${line}</p>`);
     });
 
     introductionContent.value = intro.join("");
