@@ -6,6 +6,10 @@
         </div>
 
         <div class="mx-auto w-5/6 max-w-3xl py-4">
+            <div class="mt-4">
+                <span>{{ formattedPublicationDate }}</span>
+                <!-- | <span>{{ post.category_name }}</span> -->
+            </div>
             <h1 class="font-bold text-4xl mt-4">{{ post.title }}</h1>
             <div class="mt-4" v-html="introductionContent"></div>
             <ul class="mt-4 list-disc list-inside text-[#FF8200]" v-if="summary.length">
@@ -14,9 +18,6 @@
                 </li>
             </ul>
             <div class="mt-4" v-html="processedContent"></div>
-            <div class="mt-4 text-[#FF8200]">
-                <span>{{ formattedPublicationDate }}</span> | <span>{{ post.category_name }}</span>
-            </div>
 
             <Comments :postId="post.id" />
         </div>
@@ -42,80 +43,110 @@ const toast = useToast();
 const config = useRuntimeConfig();
 
 function parseContent(content) {
+    if (!content) return;
+
     const lines = content.split("\n");
     const newContent = [];
     const intro = [];
     const titles = [];
+    let isFirstTitleFound = false;
     let isInCodeBlock = false;
     let codeBlockContent = [];
-    let isFirstTitleFound = false;
+    let isInBlockQuote = false;
+    let blockQuoteContent = [];
 
     lines.forEach((line) => {
-        const isTitle = line.startsWith("<title>");
-        const isImage = line.includes("<image>") && line.includes("</image>");
-        const isCodeStart = line.startsWith("<code>");
-        const isCodeEnd = line.endsWith("</code>");
-        const isList = line.startsWith("-");
+        console.log("Linha atual:", line);
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
 
-        if (!content) return;
+        const isTitle = trimmedLine.startsWith("<title>");
+        const isImage = trimmedLine.includes("<image>") && trimmedLine.includes("</image>");
+        const isCodeStart = trimmedLine.startsWith("<code>");
+        const isCodeEnd = trimmedLine.endsWith("</code>");
+        const isList = trimmedLine.startsWith("-");
+        const isBlockQuoteStart = trimmedLine.startsWith("<blockquote>");
+        const isBlockQuoteEnd = trimmedLine.endsWith("</blockquote>");
 
         if (isTitle) {
             isFirstTitleFound = true;
-            const title = line.replace(/<\/?title>/g, "").trim();
+            const title = trimmedLine.replace(/<\/?title>/g, "").trim();
             const formattedTitle = title.replace(/\s+/g, "-");
             titles.push({title, formattedTitle});
-
-            newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2>`);
+            newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2></br>`);
             return;
         }
 
         if (!isFirstTitleFound) {
             if (isImage) {
-                const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
+                const imgSrc = trimmedLine.replace(/<image>|<\/image>/g, "").trim();
                 intro.push(`<img class="w-full" src="${imgSrc}" alt="Introduction Image" />`);
-                return;
+            } else {
+                intro.push(`<p>${trimmedLine}</p>`);
             }
+            return;
+        }
 
-            intro.push(`<p>${line}</p><br />`);
+        if (isBlockQuoteStart) {
+            isInBlockQuote = true;
+            blockQuoteContent.push(trimmedLine.replace("<blockquote>", "").trim());
+            return;
+        }
+
+        if (isInBlockQuote) {
+            if (isBlockQuoteEnd) {
+                isInBlockQuote = false;
+                blockQuoteContent.push(trimmedLine.replace("</blockquote>", "").trim());
+                const quote = blockQuoteContent.join(" ").trim();
+                newContent.push(
+                    `<blockquote class="border-l-4 border-l-white" cite="https://4devsbytiagosc.com.br">
+                        <p class="px-4 italic leading-[1.625]">"${quote}"</p>
+                        <footer class="px-4">— Franklin D. Roosevelt</footer>
+                    </blockquote></br>`
+                );
+                blockQuoteContent = [];
+            } else {
+                blockQuoteContent.push(trimmedLine);
+            }
             return;
         }
 
         if (isImage) {
-            const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
+            const imgSrc = trimmedLine.replace(/<image>|<\/image>/g, "").trim();
             newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
             return;
         }
 
         if (isCodeStart) {
             isInCodeBlock = true;
-            codeBlockContent.push(line.replace(/<code>/, ""));
+            codeBlockContent.push(trimmedLine.replace("<code>", ""));
             return;
         }
 
         if (isInCodeBlock) {
             if (isCodeEnd) {
                 isInCodeBlock = false;
-                codeBlockContent.push(line.replace(/<\/code>/, ""));
+                codeBlockContent.push(trimmedLine.replace("</code>", ""));
                 newContent.push(
                     `<pre class="border border-primary p-4 rounded-lg bg-[#1E1E1E] text-[#FF8200] overflow-auto"><code>${codeBlockContent
                         .join("\n")
-                        .replace(/</g, "&lt;")
-                        .replace(/>/g, "&gt;")}</code></pre>`
+                        .replace(/</g, "<")
+                        .replace(/>/g, ">")}</code></pre>`
                 );
                 codeBlockContent = [];
             } else {
-                codeBlockContent.push(line);
+                codeBlockContent.push(trimmedLine);
             }
             return;
         }
 
         if (isList) {
-            const listItem = line.slice(1).trim();
+            const listItem = trimmedLine.slice(1).trim();
             newContent.push(`<li>${listItem}</li>`);
             return;
         }
 
-        newContent.push(`<p>${line}</p><br />`);
+        newContent.push(`<p>${trimmedLine}</p>`);
     });
 
     introductionContent.value = intro.join("");
@@ -130,15 +161,15 @@ onMounted(async () => {
         post.value = response.data.data;
 
         const publicationDate = new Date(post.value.publication_date);
-        formattedPublicationDate.value = `${publicationDate.toLocaleDateString("pt-BR", {
+        formattedPublicationDate.value = `Published ${publicationDate.toLocaleDateString("en-US", {
             year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-        })} at ${publicationDate.toLocaleTimeString("pt-BR", {
+            month: "long",
+            day: "numeric",
+        })} at ${publicationDate.toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
-        })} (GMT-3 São Paulo time)`;
+        })} `;
 
         parseContent(post.value.content);
     } catch (error) {
