@@ -116,12 +116,12 @@ export default {
                         },
                     })
                     .then(() => {
-                        toast.success("Post removido com sucesso!");
+                        toast.success("Post deleted!");
                         this.refreshPosts();
                         this.closeDeleteModal();
                     })
                     .catch((error) => {
-                        toast.error("Erro ao remover post");
+                        toast.error("Error when trying to delete post!");
                     });
             }
         },
@@ -153,7 +153,7 @@ export default {
                         .filter((post) => post.is_active !== 0);
                 })
                 .catch((error) => {
-                    toast.error("Erro ao buscar posts!");
+                    toast.error("Error when trying to find posts!");
                 });
         },
     },
@@ -193,7 +193,7 @@ export default {
                     .filter((post) => post.is_active !== 0);
             })
             .catch((error) => {
-                toast.error("Erro ao buscar posts!");
+                toast.error("Error when trying to find posts!");
             });
     },
 };

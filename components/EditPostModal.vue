@@ -57,7 +57,7 @@ const fetchAuthors = async () => {
         });
         authors.value = response.data.data;
     } catch (error) {
-        toast.error("Erro ao carregar autores");
+        toast.error("Error when trying to load authors!");
     }
 };
 
@@ -72,7 +72,7 @@ const fetchCategories = async () => {
         });
         categories.value = response.data.data;
     } catch (error) {
-        toast.error("Erro ao carregar categorias");
+        toast.error("Error when trying to load categories!");
     }
 };
 
@@ -101,9 +101,9 @@ const onSubmit = handleSubmit(async (values) => {
         emit("post-created");
         emit("close");
         resetForm();
-        toast.success("Post editado com sucesso!");
+        toast.success("Post edited!");
     } catch (error) {
-        toast.error("Erro ao editar post");
+        toast.error("Error when trying to edit post!");
     }
 });
 
@@ -130,14 +130,14 @@ watch(
         <div class="absolute inset-0 bg-black bg-opacity-70" @click="$emit('close')"></div>
 
         <div class="overflow-y-scroll h-[80vh] bg-[#181C14] border-2 border-[#FF8200] rounded-md w-full max-w-2xl z-10 p-6 text-white">
-            <h2 class="text-2xl font-bold mb-6 text-center">Criação de post</h2>
+            <h2 class="text-2xl font-bold mb-6 text-center">Post Edition</h2>
 
             <form @submit.prevent="onSubmit" class="space-y-4">
                 <div class="flex flex-col">
-                    <label for="author_id" class="mb-1">Autor</label>
+                    <label for="author_id" class="mb-1">Author</label>
                     <div class="flex gap-2">
                         <select id="author_id" v-model="author_id" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
-                            <option value="" disabled>Selecione um autor</option>
+                            <option value="" disabled>Select an author</option>
                             <option v-for="author in authors" :key="author.id" :value="author.id">
                                 {{ author.name }}
                             </option>
@@ -147,7 +147,7 @@ watch(
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="category_id" class="mb-1">Categoria</label>
+                    <label for="category_id" class="mb-1">Category</label>
                     <div class="flex gap-2">
                         <select id="category_id" v-model="category_id" class="flex-grow bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md">
                             <option value="" disabled>Selecione uma categoria</option>
@@ -160,7 +160,7 @@ watch(
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="title" class="mb-1">Título</label>
+                    <label for="title" class="mb-1">Title</label>
                     <input id="title" v-model="title" type="text" class="bg-[#2c2f31] border-2 border-[#ff8200] outline-none text-white px-4 py-2 rounded-md" />
                     <p v-if="errors.title" class="text-red-500 text-sm mt-1">{{ errors.title }}</p>
                 </div>
@@ -172,31 +172,31 @@ watch(
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="description" class="mb-1">Descrição</label>
+                    <label for="description" class="mb-1">Description</label>
                     <input id="description" v-model="description" type="text" class="bg-[#2c2f31] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md" />
                     <p v-if="errors.description" class="text-red-500 text-sm mt-1">{{ errors.description }}</p>
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="post_image_url" class="mb-1">URL da imagem</label>
+                    <label for="post_image_url" class="mb-1">Image URL</label>
                     <input id="post_image_url" v-model="post_image_url" type="text" class="bg-[#2c2f31] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md" />
                     <p v-if="errors.post_image_url" class="text-red-500 text-sm mt-1">{{ errors.post_image_url }}</p>
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="content" class="mb-1">Conteúdo</label>
+                    <label for="content" class="mb-1">Content</label>
                     <textarea
                         id="content"
                         v-model="content"
-                        rows="6"
+                        rows="20"
                         class="bg-[#2c2f31] border-2 border-[#FF8200] outline-none text-white px-4 py-2 rounded-md resize-none"
                     ></textarea>
                     <p v-if="errors.content" class="text-red-500 text-sm mt-1">{{ errors.content }}</p>
                 </div>
 
                 <div class="flex justify-end gap-4 mt-6">
-                    <button type="button" @click="$emit('close')" class="bg-[#2c2f31] border-2 border-[#ff8200] text-white px-6 py-2 rounded-md">Cancelar</button>
-                    <button type="submit" class="bg-[#FF8200] text-black font-bold px-6 py-2 rounded-md">Salvar</button>
+                    <button type="button" @click="$emit('close')" class="bg-[#2c2f31] border-2 border-[#ff8200] text-white px-6 py-2 rounded-md">Cancel</button>
+                    <button type="submit" class="bg-[#FF8200] text-black font-bold px-6 py-2 rounded-md">Save</button>
                 </div>
             </form>
         </div>

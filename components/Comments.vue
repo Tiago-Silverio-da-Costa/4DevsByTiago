@@ -56,7 +56,7 @@ const onSubmit = handleSubmit(async (values) => {
     if (!isAuthenticated.value) return;
 
     if (!values.comment || values.comment.trim().length === 0) {
-        toast.error("O comentário não pode estar vazio");
+        toast.error("The comment cannot be empty!");
         return;
     }
 
@@ -86,9 +86,9 @@ const onSubmit = handleSubmit(async (values) => {
         textareaRows.value = 1;
         showSubmitButton.value = false;
         await fetchComments();
-        toast.success("Comentário adicionado com sucesso!");
+        toast.success("Comentário added!");
     } catch (error) {
-        toast.error("Erro ao adicionar comentário");
+        toast.error("Error when trying to create a comment!");
     } finally {
         addingComment.value = false;
     }
@@ -116,7 +116,7 @@ const fetchComments = async () => {
         const response = await axios.get(`${runtimeConfig.public.apiBase}/comments/${props.postId}`);
         comments.value = response.data.data.comments;
     } catch (error) {
-        toast.error("Erro ao carregar comentários");
+        toast.error("Error when trying to load comments!");
     } finally {
         loading.value = false;
     }

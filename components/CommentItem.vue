@@ -46,7 +46,7 @@ const timeAgo = (createdAt) => {
 
 const submitReply = async () => {
     if (!replyContent.value.trim()) {
-        toast.error("A resposta não pode estar vázia");
+        toast.error("The reply cannot be empty!");
         return;
     }
 
@@ -73,12 +73,12 @@ const submitReply = async () => {
                 },
             }
         );
-        toast.success("Resposta adicionada com sucesso!");
+        toast.success("Reply added!");
         replyContent.value = "";
         showReplyForm.value = false;
         emit("refresh-comments");
     } catch (error) {
-        toast.error("Erro ao adicionar resposta");
+        toast.error("Error when trying to add reply!");
     } finally {
         addingReply.value = false;
     }

@@ -40,14 +40,14 @@ const onSubmit = handleSubmit(async (values) => {
         const response = await axios.post(`${runtimeConfig.public.apiBase}/user/login`, dataSend);
 
         if (response.status === 200 || response.status === 201) {
-            toast.success("Acesso bem-sucedido!");
+            toast.success("Access succeed!");
             sessionStorage.setItem("token", response.data.results.token);
             const authStore = useAuthStore();
             authStore.loadUser();
             navigateTo("/");
         }
     } catch (error) {
-        const errorMessage = error.response?.data?.message || "Ocorreu um erro ao tentar acessar!";
+        const errorMessage = error.response?.data?.message || "Something went wrong. Try again.";
         toast.error(errorMessage);
     } finally {
         isLoading.value = false;
