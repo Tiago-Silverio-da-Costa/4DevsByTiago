@@ -12,7 +12,7 @@
             </div>
             <h1 class="font-bold text-4xl mt-4">{{ post.title }}</h1>
             <div class="mt-4" v-html="introductionContent"></div>
-            <ul class="mt-4 list-disc list-inside text-[#FF8200]" v-if="summary.length">
+            <ul class="list-disc list-inside text-[#FF8200]" v-if="summary.length">
                 <li v-for="(item, index) in summary" :key="index">
                     <nuxt-link :to="`#${item.formattedTitle}`">{{ item.title }}</nuxt-link>
                 </li>
@@ -58,13 +58,18 @@ function parseContent(content) {
         const isCodeEnd = line.endsWith("</code>");
         const isList = line.startsWith("-");
         const isQuote = line.includes("<blockquote>") && line.includes("</blockquote>");
+        const isAnchor = line.includes("<a>") && line.includes("</a>");
 
         if (!content) return;
+
+        if (isAnchor) {
+        }
 
         if (isTitle) {
             isFirstTitleFound = true;
             const title = line.replace(/<\/?title>/g, "").trim();
             const formattedTitle = title.replace(/\s+/g, "-");
+
             titles.push({title, formattedTitle});
 
             newContent.push(`<h2 id="${formattedTitle}" class="text-3xl font-bold text-primary">${title}</h2></br>`);
@@ -78,13 +83,33 @@ function parseContent(content) {
                 return;
             }
 
+            if (isQuote) {
+                const quoteMatch = line.match(/<blockquote>(.*?)(?:<author>.*<\/author>)?<\/blockquote>/);
+                const quote = quoteMatch ? quoteMatch[1].trim() : "";
+
+                const authorMatch = line.match(/<author>(.*?)<\/author>/);
+                const author = authorMatch ? authorMatch[1].trim() : "";
+
+                intro.push(
+                    `<blockquote class="border-l-4 border-l-white mt-4" cite="https://4devsbytiagosc.com.br">
+                    <p class="px-4 italic leading-[1.625]">
+                         &ldquo;${quote}&ldquo;
+                    </p>
+                    <footer class="px-4">— ${author}</footer>
+                </blockquote>
+                </br>
+`
+                );
+                return;
+            }
+
             intro.push(`<p>${line}</p>`);
             return;
         }
 
         if (isImage) {
             const imgSrc = line.replace(/<image>|<\/image>/g, "").trim();
-            newContent.push(`<img class="w-full mt-4" src="${imgSrc}" alt="Post Image" />`);
+            newContent.push(`<img class="" src="${imgSrc}" alt="Post Image" /></br>`);
             return;
         }
 
@@ -98,7 +123,7 @@ function parseContent(content) {
             newContent.push(
                 `<blockquote class="border-l-4 border-l-white" cite="https://4devsbytiagosc.com.br">
                     <p class="px-4 italic leading-[1.625]">
-                         &ldquo;Esta é uma citação tirada da Mozilla Developer Center.${quote}&ldquo;
+                         &ldquo;${quote}&ldquo;
                     </p>
                     <footer class="px-4">— ${author}</footer>
                 </blockquote>
@@ -133,7 +158,7 @@ function parseContent(content) {
 
         if (isList) {
             const listItem = line.slice(1).trim();
-            newContent.push(`<li>${listItem}</li>`);
+            newContent.push(`<li>${listItem}</li></br>`);
             return;
         }
 
